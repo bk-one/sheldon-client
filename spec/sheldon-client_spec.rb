@@ -8,14 +8,15 @@ describe "SheldonClient" do
 
     it "should return to the configured host" do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
-      SheldonClient.host.should == 'http://i.am.the.real.sheldon/'
+      SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
   end
 
   context "building request urls" do
     it "should create correct url from given options" do
-      SheldonClient.build_request_url( from: 13, to: 14, type: :foo ).should == "/nodes/13/connections/foo/14"
-      SheldonClient.build_request_url( from: 10, to: 11, type: :bar ).should == "/nodes/10/connections/bar/11"
+      SheldonClient.host = 'http://i.am.the.real.sheldon/'
+      SheldonClient.build_request_url( from: 13, to: 14, type: :foo ).path.should == "/nodes/13/connections/foo/14"
+      SheldonClient.build_request_url( from: 10, to: 11, type: :bar ).path.should == "/nodes/10/connections/bar/11"
     end
   end
 
@@ -50,6 +51,16 @@ describe "SheldonClient" do
 	    SheldonClient.create_edge( from: 10, to: 11, type: :movies_genres, payload: { weight: 0.4 } )
     end
 
+  end
+
+  context "searching for nodes" do
+    it "should search for a movie" do
+      stub_request(:get, "http://other.sheldon.host/search/nodes/movies?production_year=1999&title=Matrix").
+          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+          to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
+      
+      SheldonClient.search_movie( 'Matrix', '1999' ).should == "123"
+    end
   end
 
 end

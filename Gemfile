@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "httparty", "~> 0.7.0"
+gem 'addressable', '~> 2.2.0'
 
 group :development do
   gem "rspec", "~> 2.3.0"
