@@ -72,7 +72,7 @@ class SheldonClient
   #
   #    matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
   #    action = SheldonClient.search( :genres, name: 'Action').first
-  #    SheldonClient.create_edge from: matrix, to: action, payload: { weight: 1.0 }
+  #    SheldonClient.create_edge from: matrix, to: action, type: 'hasGenre', payload: { weight: 1.0 }
   #    => true
   #
   def self.create_edge( options )
