@@ -14,19 +14,25 @@ class SheldonClient
       http.request(req)
     end
   end
+  
+  def self.node_payload( id )
+    uri = self.build_node_url( id )
+    response = Net::HTTP.start( uri.host, uri.port ) do |http|
+      req = Net::HTTP::Get.new( uri.request_uri )
+      default_headers(req)
+      http.request(req)
+    end
+    response.code == '200' ? JSON.parse(response.body)['payload'] : nil
+  end
 
-  def self.search_movie( title, production_year )
+  def self.search_movie( title, production_year = nil )
     uri = self.build_search_url( :movies, { :title => title, :production_year => production_year } )
     response = Net::HTTP.start( uri.host, uri.port ) do |http|
       req = Net::HTTP::Get.new( uri.request_uri )
       default_headers(req)
       http.request(req)
     end
-    if response.code == '200'
-      JSON.parse(response.body).first["id"]
-    else
-      nil
-    end
+    response.code == '200' ? JSON.parse(response.body).first['id'] : nil
   end
   
   def self.host
@@ -46,6 +52,10 @@ class SheldonClient
 
   def self.build_request_url(options)
     Addressable::URI.parse( self.host + "/nodes/" + options[:from].to_s + "/connections/" + options[:type].to_s  + "/" + options[:to].to_s )
+  end
+  
+  def self.build_node_url( id )
+    Addressable::URI.parse( self.host + "/node/" + id.to_s )
   end
   
   def self.build_search_url( type, query_parameters )

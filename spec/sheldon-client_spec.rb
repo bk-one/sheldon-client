@@ -63,4 +63,14 @@ describe "SheldonClient" do
     end
   end
 
+  context "node payloads" do
+    it "should return the payload of a given node" do
+      stub_request(:get, "http://other.sheldon.host/node/2001").
+          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+          to_return(:status => 200, :body => { "type" => "Movie", "id" => "123", "payload" => { "title" => "MyTitle"} }.to_json )
+      
+      SheldonClient.node_payload( 2001 ).should == { "title" => "MyTitle" }
+    end
+  end
+
 end
