@@ -1,6 +1,42 @@
 = sheldon-client
 
-Description goes here.
+This is the basic library to fetch data from or store data to sheldon. This
+gem is not publicly available. To install it, check out the source, bundle
+and install the gem manually, like that:
+
+  git clone git@github.com:moviepilot/sheldon-client.git
+  cd sheldon-client
+  bundle
+  rake build
+  
+== Sheldon Communication
+
+As this is a simple REST wrapper, we keep things fairly simple here. If
+we need a more sophisticated version of this, we should consider moving
+to ActiveResource or any other REST wrapper. 
+
+First of all you might want to check out this small example.
+
+  irb > gem 'sheldon-client'
+  irb > SheldonClient.host = 'http://sheldon.labs.mvp.to:2311' # this is the default host
+  irb > SheldonClient.search :movies, title: 'The Matrix'
+  => [#<Sheldon::Node 430 (Movie/The Matrix)>] 
+  irb > _.first.payload['production_year']
+  => "1999" 
+  
+Beside searching, you can use SheldonClient to create edges.
+
+  irb > matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
+  irb > action = SheldonClient.search( :genres, name: 'Action').first
+  irb > SheldonClient.create_edge from: matrix, to: action, payload: { weight: 1.0 }
+  => true
+  
+
+Please bear in mind, that this client library does little to no validations.
+So if you get an exception, you probably passed in options that sheldon (or
+this client for that matter) cannot deal with. Feel free to improve stability
+if necessary.
+
 
 == Contributing to sheldon-client
  
@@ -14,6 +50,6 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Pontus Lindstrom. See LICENSE.txt for
+Copyright (c) 2011 Pontus Lindstrom, Benjamin Krause. See LICENSE.txt for
 further details.
 

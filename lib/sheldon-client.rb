@@ -1,67 +1,99 @@
 require 'net/http'
 require 'json'
 require 'addressable/uri'
-
+require 'sheldon-client/configuration'
+require 'sheldon-client/http'
+require 'sheldon-client/node'
+require 'sheldon-client/search'
 
 class SheldonClient
+  extend SheldonClient::Configuration
+  extend SheldonClient::HTTP
+  extend SheldonClient::Search
   
+  
+  # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
+  # or an empty array.
+  #
+  # ==== Parameters
+  # 
+  # * <tt>type</tt> - plural of any known sheldon node type like :movies or :genres
+  # * <tt>options</tt> - the search option that will be forwarded to lucene. This depends
+  #   on the type, see below.
+  #
+  # ==== Search Options
+  # 
+  # Depending on the type of nodes you're searching for, different search options should
+  # be provided. Please refer to the sheldon documentation for the most up-to-date version
+  # of this. As of today, the following search options are supported.
+  #
+  # * <tt>movies</tt> - title, production_year
+  # * <tt>genres</tt> - name
+  # * <tt>person</tt> - name
+  #
+  # Sheldon will pass the search options to lucene, so if an option is supported and 
+  # interpreted as exptected need to be verified by the Sheldon team. See http://bit.ly/hBpr4a
+  # for more information.
+  #  
+  # ==== Examples
+  #
+  # Search for a specific movie
+  # 
+  #   SheldonClient.search :movies, { title: 'The Matrix' }
+  #   SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
+  #
+  # Search for a specific genre
+  #  
+  #    SheldonClient.search :genres, { name: 'Action' }
+  #
+  # And now with wildcards
+  #
+  #    SheldonClient.search :movies, { title: 'Fist*' }
+  #
+  def self.search( type, options )
+    uri = build_search_url( type, options )
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_search_result(response.body) : []
+  end
+  
+  
+  # Create an edge between two sheldon nodes. 
+  #
+  # ==== Parameters
+  # 
+  # * <tt>options</tt> - the options to create an edge. This must
+  #   include <tt>from</tt>, <tt>to</tt>, <tt>type</tt> and 
+  #   <tt>payload</tt>. The <tt>to</tt> and <tt>from</tt> option
+  #   accepts a SheldonClient::Node Object or an integer.
+  #
+  # ==== Examples
+  #
+  # Create an edge between a movie and a genre.
+  #
+  #    matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
+  #    action = SheldonClient.search( :genres, name: 'Action').first
+  #    SheldonClient.create_edge from: matrix, to: action, payload: { weight: 1.0 }
+  #    => true
+  #
   def self.create_edge( options )
-    uri = self.build_request_url(options)
-    response = Net::HTTP.start(uri.host, uri.port) do |http|
-      req = Net::HTTP::Put.new( uri.request_uri )
-      default_headers(req)
-      req.body = { :weight => options[:payload][:weight] }.to_json
-      http.request(req)
-    end
-  end
-  
-  def self.node_payload( id )
-    uri = self.build_node_url( id )
-    response = Net::HTTP.start( uri.host, uri.port ) do |http|
-      req = Net::HTTP::Get.new( uri.request_uri )
-      default_headers(req)
-      http.request(req)
-    end
-    response.code == '200' ? JSON.parse(response.body)['payload'] : nil
+    response = build_request( :put, create_edge_url( options ), options[:payload] )
+    # response.code == '200' ? true : false
   end
 
-  def self.search_movie( title, production_year = nil )
-    uri = self.build_search_url( :movies, { :title => title, :production_year => production_year } )
-    response = Net::HTTP.start( uri.host, uri.port ) do |http|
-      req = Net::HTTP::Get.new( uri.request_uri )
-      default_headers(req)
-      http.request(req)
-    end
-    response.code == '200' ? JSON.parse(response.body).first['id'] : nil
-  end
   
-  def self.host
-    @host
+  # Fetch a single node object from sheldon
+  #
+  # ==== Parameters
+  #
+  # * <tt>id</tt> - the sheldon id
+  #
+  # ==== Examples
+  #
+  #   SheldonClient.node 17007
+  #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
+  #
+  def self.node( id )
+    response = send_request( :get, build_node_url( id ) )
+    response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
   end
-
-  def self.host=( value )
-    @host = value.chomp("/")
-  end
-  
-  private
-
-  def self.default_headers( request )
-    request['Content-Type'] = 'application/json'
-    request['Accept'] = 'application/json'
-  end
-
-  def self.build_request_url(options)
-    Addressable::URI.parse( self.host + "/nodes/" + options[:from].to_s + "/connections/" + options[:type].to_s  + "/" + options[:to].to_s )
-  end
-  
-  def self.build_node_url( id )
-    Addressable::URI.parse( self.host + "/node/" + id.to_s )
-  end
-  
-  def self.build_search_url( type, query_parameters )
-    uri = Addressable::URI.parse( self.host + "/search/nodes/" + type.to_s )
-    uri.query_values = query_parameters
-    uri
-  end
-
 end
