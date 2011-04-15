@@ -51,11 +51,20 @@ describe "SheldonClient" do
 	    SheldonClient.create_edge( from: 10, to: 11, type: :movies_genres, payload: { weight: 0.4 } )
     end
 
+    it "should create edges from node objects" do
+      stub_request(:put, "http://sheldon.host/node/123/connections/movies_genres/321").
+          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
+               :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
+               
+ 	    SheldonClient.create_edge( from: SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'}), 
+ 	                                 to: SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'}),
+ 	                               type: :movies_genres, payload: { weight: 0.4 } )
+    end
   end
 
   context "searching for nodes" do
     it "should search for movies" do
-      stub_request(:get, "http://other.sheldon.host/search/nodes/movies?production_year=1999&title=Matrix").
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
           
@@ -66,7 +75,7 @@ describe "SheldonClient" do
     end
     
     it "should search for genres" do
-      stub_request(:get, "http://other.sheldon.host/search/nodes/genres?name=Action").
+      stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Genre", "id" => "321" }].to_json )
           
@@ -77,7 +86,7 @@ describe "SheldonClient" do
     end
     
     it "should return an empty array on no-content responses" do
-      stub_request(:get, "http://other.sheldon.host/search/nodes/genres?name=Action").
+      stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 204, :body => '' )
           
@@ -87,7 +96,7 @@ describe "SheldonClient" do
 
   context "node payloads" do
     it "should return the payload of a given node" do
-      stub_request(:get, "http://other.sheldon.host/node/2001").
+      stub_request(:get, "http://sheldon.host/node/2001").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => { "type" => "Movie", "id" => "123", "payload" => { "title" => "MyTitle" } }.to_json )
       

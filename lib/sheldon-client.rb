@@ -76,8 +76,8 @@ class SheldonClient
   #    => true
   #
   def self.create_edge( options )
-    response = build_request( :put, create_edge_url( options ), options[:payload] )
-    # response.code == '200' ? true : false
+    response = send_request( :put, create_edge_url( options ), options[:payload] )
+    response.code == '200' ? true : false
   end
 
   

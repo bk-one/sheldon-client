@@ -1,8 +1,8 @@
 class SheldonClient
   module HTTP
-    def send_request( method, uri )
+    def send_request( method, uri, body = nil )
       Net::HTTP.start( uri.host, uri.port ) do |http|
-        req = build_request( method, uri )
+        req = build_request( method, uri, body )
         default_headers(req)
         http.request(req)
       end
@@ -10,7 +10,7 @@ class SheldonClient
 
     def build_request( method, uri, body = nil )
       request = Object.module_eval("Net::HTTP::#{method.capitalize}").new( uri.request_uri )
-      request.body = body if body
+      request.body = body.to_json if body
       request
     end
 
@@ -20,7 +20,9 @@ class SheldonClient
     end
 
     def create_edge_url(options)
-      Addressable::URI.parse( self.host + "/node/" + options[:from].to_s + "/connections/" + options[:type].to_s  + "/" + options[:to].to_s )
+      from = options[:from].is_a?(Node) ? options[:from].id : options[:from].to_i
+      to   = options[:to].is_a?(Node) ? options[:to].id : options[:to].to_i
+      Addressable::URI.parse( self.host + "/node/#{from}/connections/#{options[:type]}/#{to}" )
     end
 
     def build_node_url( id )

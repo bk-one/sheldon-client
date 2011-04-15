@@ -24,11 +24,12 @@ First of all you might want to check out this small example.
   irb > _.first.payload['production_year']
   => "1999" 
   
-Beside searching, you can use SheldonClient to create edges.
+Beside searching, you can use SheldonClient to create edges. Please 
+consult your sheldon manual (aka jayniz) for valid edge types.
 
   irb > matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
   irb > action = SheldonClient.search( :genres, name: 'Action').first
-  irb > SheldonClient.create_edge from: matrix, to: action, payload: { weight: 1.0 }
+  irb > SheldonClient.create_edge from: matrix, to: action, type: 'hasGenre', payload: { weight: 1.0 }
   => true
   
 
