@@ -3,6 +3,10 @@ class SheldonClient
     
     protected 
     
+    def parse_result(json_string)
+      Node.new JSON.parse(json_string)
+    end
+    
     def parse_search_result( json_string )
       JSON.parse( json_string ).map do |node_data|
         Node.new node_data

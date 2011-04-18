@@ -90,13 +90,13 @@ class SheldonClient
   #
   # Create a new node
   #
-  #    matrix = SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
-  #    => true
+  #    SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
+  #    => SheldonClient::Node object
   #
   
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '200' ? true : false
+    response.code == '201' ? parse_result(response.body) : []
   end
 
   
