@@ -5,6 +5,7 @@ require 'sheldon-client/configuration'
 require 'sheldon-client/http'
 require 'sheldon-client/node'
 require 'sheldon-client/search'
+require 'sheldon-client/edge'
 
 class SheldonClient
   extend SheldonClient::Configuration
@@ -55,8 +56,49 @@ class SheldonClient
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
   end
+
+  # Fetch all the edges of a certain type connected to a given node.
+  #
+  # ==== Parameters
+  #
+  # * <tt> node </tt> The node that we are going to fetch edges from
+  # * <tt> type </tt> The egde type we are interesting in
+  #
+  # ==== Examples
+  #
+  #  m = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
+  #  e = SheldonClient.fetch_edges(m, 'genre_taggings')
+  #
+  #  g = SheldonClient.search(:genres, name: 'Drama').first
+  #  e = SheldonClient.fetch_edges(m, 'genre_taggings')
+  #
+  #  m = SheldonClient.fetch_node( 430 )
+  #  e = SheldonClient.fetch_edges(
+  #
+
+  def self.fetch_edges( node, type )
+    uri = build_edge_search_url( node.id, type)
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_search_result(response.body) : []
+  end
   
   
+  # Fetches the node with the given id
+  #
+  # ==== Parameters
+  #
+  # * <tt> id </tt> The id of the node that is going to be fetched
+  #
+  # ==== Examples
+  # 
+  # m = SheldonClient.fetch_node( 430 )
+
+  def self.fetch_node( id )
+    uri = build_node_url id
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_node(response.body) : nil
+  end
+
   # Create an edge between two sheldon nodes. 
   #
   # ==== Parameters
@@ -75,6 +117,7 @@ class SheldonClient
   #    SheldonClient.create_edge from: matrix, to: action, type: 'hasGenre', payload: { weight: 1.0 }
   #    => true
   #
+  
   def self.create_edge( options )
     response = send_request( :put, create_edge_url( options ), options[:payload] )
     response.code == '200' ? true : false
@@ -96,10 +139,9 @@ class SheldonClient
   
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '201' ? parse_result(response.body) : []
+    response.code == '201' ? parse_node(response.body) : []
   end
 
-  
   # Fetch a single node object from sheldon
   #
   # ==== Parameters
@@ -115,4 +157,5 @@ class SheldonClient
     response = send_request( :get, build_node_url( id ) )
     response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
   end
+
 end
