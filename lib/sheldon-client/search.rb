@@ -3,7 +3,6 @@ class SheldonClient
     
     protected 
     
-
     def parse_search_result( json_string )
       JSON.parse( json_string ).map do |data|
         if is_edge?( data )

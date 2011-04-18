@@ -133,8 +133,8 @@ class SheldonClient
   #
   # Create a new node
   #
-  #    matrix = SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
-  #    => true
+  #    SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
+  #    => SheldonClient::Node object
   #
   
   def self.create_node( options )
