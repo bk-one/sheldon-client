@@ -114,7 +114,7 @@ class SheldonClient
   #
   #    matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
   #    action = SheldonClient.search( :genres, name: 'Action').first
-  #    SheldonClient.create_edge from: matrix, to: action, type: 'hasGenre', payload: { weight: 1.0 }
+  #    SheldonClient.create_edge from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
   #    => true
   #
   
@@ -139,7 +139,7 @@ class SheldonClient
   
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '200' ? true : false
+    response.code == '201' ? true : false
   end
 
   # Fetch a single node object from sheldon
