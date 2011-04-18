@@ -24,6 +24,10 @@ class SheldonClient
       to   = options[:to].is_a?(Node) ? options[:to].id : options[:to].to_i
       Addressable::URI.parse( self.host + "/node/#{from}/connections/#{options[:type]}/#{to}" )
     end
+    
+    def create_node_url(options)
+      Addressable::URI.parse( self.host + "/nodes/#{options[:type]}" )
+    end
 
     def build_node_url( id )
       Addressable::URI.parse( self.host + "/node/" + id.to_s )

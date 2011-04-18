@@ -17,7 +17,24 @@ describe "SheldonClient" do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
       SheldonClient.create_edge_url( from: 13, to: 14, type: :foo ).path.should == "/node/13/connections/foo/14"
       SheldonClient.create_edge_url( from: 10, to: 11, type: :bar ).path.should == "/node/10/connections/bar/11"
+      SheldonClient.create_node_url( type: :movie ).path.should == "/nodes/movie"
     end
+  end
+
+
+  context "create nodes in sheldon" do
+     before(:each) do
+        SheldonClient.host = 'http://sheldon.host'
+      end
+      
+      it "should create a node" do
+        stub_request(:post, "http://other.sheldon.host/nodes/movie").
+            with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
+                 :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
+
+        SheldonClient.host = 'http://other.sheldon.host' 
+        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 }) 
+      end
   end
 
   context "creating edges in sheldon" do

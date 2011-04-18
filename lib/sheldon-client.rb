@@ -79,6 +79,25 @@ class SheldonClient
     response = send_request( :put, create_edge_url( options ), options[:payload] )
     response.code == '200' ? true : false
   end
+  
+  # Create a new node at sheldon.
+  #
+  # ==== Parameters
+  # * <tt>options</tt> - the options to create a node. This must
+  #   include the <tt>payload</tt>.
+  #
+  # ==== Examples
+  #
+  # Create a new node
+  #
+  #    matrix = SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
+  #    => true
+  #
+  
+  def self.create_node( options )
+    response = send_request( :post, create_node_url( options ), options[:payload] )
+    response.code == '200' ? true : false
+  end
 
   
   # Fetch a single node object from sheldon
