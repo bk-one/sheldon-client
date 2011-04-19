@@ -28,11 +28,11 @@ class SheldonClient
     end
 
     def build_edge_search_url( node_id, type )
-      uri = Addressable::URI.parse( self.host + "/node/" + node_id.to_s + "/connections/" + type.to_s )
+      uri = Addressable::URI.parse( self.host + "/nodes/" + node_id.to_s + "/connections/" + type.to_s )
     end
 
     def build_node_url( node_id )
-      uri = Addressable::URI.parse( self.host + "/node/" + node_id.to_s)
+      uri = Addressable::URI.parse( self.host + "/nodes/" + node_id.to_s)
     end
   end
 end

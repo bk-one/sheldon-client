@@ -15,8 +15,8 @@ describe "SheldonClient" do
   context "building request urls" do
     it "should create correct url from given options" do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
-      SheldonClient.create_edge_url( from: 13, to: 14, type: :foo ).path.should == "/node/13/connections/foo/14"
-      SheldonClient.create_edge_url( from: 10, to: 11, type: :bar ).path.should == "/node/10/connections/bar/11"
+      SheldonClient.create_edge_url( from: 13, to: 14, type: :foo ).path.should == "/nodes/13/connections/foo/14"
+      SheldonClient.create_edge_url( from: 10, to: 11, type: :bar ).path.should == "/nodes/10/connections/bar/11"
       SheldonClient.create_node_url( type: :movie ).path.should == "/nodes/movie"
     end
   end
@@ -43,7 +43,7 @@ describe "SheldonClient" do
     end
 
     it "should create an request to create an edge" do
-      stub_request(:put, "http://sheldon.host/node/13/connections/movies_genres/14").
+      stub_request(:put, "http://sheldon.host/nodes/13/connections/movies_genres/14").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
 
@@ -51,7 +51,7 @@ describe "SheldonClient" do
 	  end
 
     it "should be able to talk to a different host" do
-      stub_request(:put, "http://other.sheldon.host/node/10/connections/movies_genres/11").
+      stub_request(:put, "http://other.sheldon.host/nodes/10/connections/movies_genres/11").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
 
@@ -60,7 +60,7 @@ describe "SheldonClient" do
     end
 
     it "should include the right payload" do
-      stub_request(:put, "http://other.sheldon.host/node/10/connections/movies_genres/11").
+      stub_request(:put, "http://other.sheldon.host/nodes/10/connections/movies_genres/11").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
 
@@ -69,7 +69,7 @@ describe "SheldonClient" do
     end
 
     it "should create edges from node objects" do
-      stub_request(:put, "http://sheldon.host/node/123/connections/movies_genres/321").
+      stub_request(:put, "http://sheldon.host/nodes/123/connections/movies_genres/321").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
                
@@ -113,7 +113,7 @@ describe "SheldonClient" do
 
   context "node payloads" do
     it "should return the payload of a given node" do
-      stub_request(:get, "http://sheldon.host/node/2001").
+      stub_request(:get, "http://sheldon.host/nodes/2001").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => { "type" => "Movie", "id" => "123", "payload" => { "title" => "MyTitle" } }.to_json )
       
@@ -126,10 +126,10 @@ describe "SheldonClient" do
 
   context "updating nodes" do
     it "should update the the year of a given node" do
-      stub_request(:get, "http://sheldon.host/node/500").
+      stub_request(:get, "http://sheldon.host/nodes/500").
               with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
          to_return(:status => 200, :body => { :id => 500, :type => "Movie", :payload => { :year => 2000 } }.to_json )
-      stub_request(:put, "http://sheldon.host/node/500").
+      stub_request(:put, "http://sheldon.host/nodes/500").
               with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                    :body    => { :year => 2000 }.to_json).to_return(:status => 200)
       SheldonClient.update_node( 500, { year: 2000 } ).should == true

@@ -22,7 +22,7 @@ class SheldonClient
     def create_edge_url(options)
       from = options[:from].is_a?(Node) ? options[:from].id : options[:from].to_i
       to   = options[:to].is_a?(Node) ? options[:to].id : options[:to].to_i
-      Addressable::URI.parse( self.host + "/node/#{from}/connections/#{options[:type]}/#{to}" )
+      Addressable::URI.parse( self.host + "/nodes/#{from}/connections/#{options[:type]}/#{to}" )
     end
     
     def create_node_url(options)
@@ -30,7 +30,7 @@ class SheldonClient
     end
 
     def build_node_url( id )
-      Addressable::URI.parse( self.host + "/node/" + id.to_s )
+      Addressable::URI.parse( self.host + "/nodes/" + id.to_s )
     end
   end
 end
