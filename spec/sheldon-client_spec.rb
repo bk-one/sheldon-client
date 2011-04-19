@@ -36,6 +36,55 @@ describe "SheldonClient" do
         SheldonClient.create_node( type: :movie, payload: { weight: 1.0 }) 
       end
   end
+  
+  context "delete nodes in sheldon" do
+     before(:each) do
+        SheldonClient.host = 'http://sheldon.host'
+      end
+      
+      it "should create a node" do
+        stub_request(:delete, "http://other.sheldon.host/nodes/12").
+            with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+            to_return(:status => 200)
+
+        SheldonClient.host = 'http://other.sheldon.host' 
+        SheldonClient.delete_node(12).should == true
+      end
+      
+      it "should return false when deleting non existance nodes" do
+        stub_request(:delete, "http://other.sheldon.host/nodes/122").
+            with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+            to_return(:status => 404)
+
+        SheldonClient.host = 'http://other.sheldon.host' 
+        SheldonClient.delete_node(122).should == false
+      end
+  end
+  
+  context "delete connections in sheldon" do
+      before(:each) do
+         SheldonClient.host = 'http://sheldon.host'
+       end
+
+       it "should create a node" do
+         stub_request(:delete, "http://other.sheldon.host/connections/12").
+             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+             to_return(:status => 200)
+
+         SheldonClient.host = 'http://other.sheldon.host' 
+         SheldonClient.delete_edge(12).should == true
+       end
+
+       it "should return false when deleting non existance nodes" do
+         stub_request(:delete, "http://other.sheldon.host/connections/122").
+             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+             to_return(:status => 404)
+
+         SheldonClient.host = 'http://other.sheldon.host' 
+         SheldonClient.delete_edge(122).should == false
+       end
+   end
+  
 
   context "creating edges in sheldon" do
     before(:each) do
@@ -135,5 +184,5 @@ describe "SheldonClient" do
       SheldonClient.update_node( 500, { year: 2000 } ).should == true
     end
   end
-
+  
 end

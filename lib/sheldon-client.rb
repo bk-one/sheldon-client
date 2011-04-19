@@ -164,6 +164,42 @@ class SheldonClient
     response.code == '200' ? true : false
   end
 
+  # Deletes a node from the database
+  #
+  # ==== Parameters
+  # * <tt>id</tt> - The node id we want to be deleted from the database 
+  #
+  # ==== Examples 
+  #  SheldonClient.delete_node(2011)
+  #   => true
+  #
+  #  SheldonClient.delete_node(201) //Non existant node
+  #   => false
+  #
+  
+  def self.delete_node(id)
+    response = SheldonClient.send_request( :delete, build_node_url( id ) )
+    response.code == '200' ? true : false
+  end
+  
+  # Deletes a edge from the database
+  #
+  # ==== Parameters
+  # * <tt>id</tt> - The edge id we want to be deleted from the database 
+  #
+  # ==== Examples 
+  #  SheldonClient.delete_edge(2011)
+  #   => true
+  #
+  #  SheldonClient.delete_edge(201) //Non existant edge
+  #   => false
+  #
+  
+  def self.delete_edge(id)
+    response = SheldonClient.send_request( :delete, build_edge_url( id ) )
+    response.code == '200' ? true : false
+  end
+
   # Fetch a single node object from sheldon
   #
   # ==== Parameters
@@ -176,7 +212,8 @@ class SheldonClient
   #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
   #
   def self.node( id )
-    response = send_request( :get, build_node_url( id ) )
+    uri = build_node_url( id ) 
+    response = send_request( :get, uri )
     response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
   end
 
