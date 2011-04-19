@@ -7,7 +7,7 @@ class SheldonClient
       self.type    = hash['type']
       self.payload = hash['payload']
     end
-    
+
     def to_s
       "#<Sheldon::Node #{id} (#{type}/#{name})>"
     end

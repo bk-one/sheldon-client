@@ -124,4 +124,16 @@ describe "SheldonClient" do
     end
   end
 
+  context "updating nodes" do
+    it "should update the the year of a given node" do
+      stub_request(:get, "http://sheldon.host/node/500").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => { :id => 500, :type => "Movie", :payload => { :year => 2000 } }.to_json )
+      stub_request(:put, "http://sheldon.host/node/500").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
+                   :body    => { :year => 2000 }.to_json).to_return(:status => 200)
+      SheldonClient.update_node( 500, { year: 2000 } ).should == true
+    end
+  end
+
 end

@@ -114,7 +114,7 @@ class SheldonClient
   #
   #    matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
   #    action = SheldonClient.search( :genres, name: 'Action').first
-  #    SheldonClient.create_edge from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
+  #    SheldonClient.create_edge {from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
   #    => true
   #
   
@@ -140,6 +140,28 @@ class SheldonClient
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
     response.code == '201' ? true : false
+  end
+
+  # Updates the payload in a node
+  #
+  # ==== Parameters
+  # * <tt>options</tt> - The options that is going to be updated in the node
+  #   include the <tt>payload</tt>
+  #
+  # ==== Examples 
+  #
+  # Update a node
+  #
+  #   SheldonClient.update_node( 450, { payload: { year: '1999'} }
+  #    => true
+  #
+  #   SheldonClient.update_node( 456, { payload: { title: 'Air bud'} }
+  #    => true
+
+  def self.update_node( id, options )
+    node = node( id ) or return false
+    response = SheldonClient.send_request( :put, build_node_url( node.id ), options )
+    response.code == '200' ? true : false
   end
 
   # Fetch a single node object from sheldon
