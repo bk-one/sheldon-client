@@ -2,6 +2,7 @@ class SheldonClient
   module HTTP
     def send_request( method, uri, body = nil )
       Net::HTTP.start( uri.host, uri.port ) do |http| 
+        http.read_timeout = 3600
         req = build_request( method, uri, body )
         default_headers(req)
         http.request(req)
