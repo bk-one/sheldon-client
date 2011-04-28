@@ -21,8 +21,9 @@ class SheldonClient
        data['from'] and data['to']
     end
 
-    def build_search_url( type, query_parameters )
+    def build_search_url( type, query_parameters, index )
       uri = Addressable::URI.parse( self.host + "/search/nodes/" + type.to_s )
+      query_parameters['type'] = index.to_s if index != :exact
       uri.query_values = query_parameters
       uri
     end

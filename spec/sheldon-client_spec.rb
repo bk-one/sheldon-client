@@ -130,11 +130,11 @@ describe "SheldonClient" do
 
   context "searching for nodes" do
     it "should search for movies" do
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix").
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix&type=fulltext").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
           
-      result = SheldonClient.search( :movies, title: 'Matrix', production_year: '1999' )
+      result = SheldonClient.search( :movies, {title: 'Matrix', production_year: '1999'}, :fulltext )
       result.first.should be_a SheldonClient::Node
       result.first.id.should == "123"
       result.first.type.should == 'Movie'
@@ -145,7 +145,7 @@ describe "SheldonClient" do
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Genre", "id" => "321" }].to_json )
           
-      result = SheldonClient.search( :genres, name: 'Action' )
+      result = SheldonClient.search( :genres, {name: 'Action'} )
       result.first.should be_a SheldonClient::Node
       result.first.id.should == "321"
       result.first.type.should == 'Genre'
@@ -156,7 +156,7 @@ describe "SheldonClient" do
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 204, :body => '' )
           
-      SheldonClient.search( :genres, name: 'Action' ).should == []
+      SheldonClient.search( :genres, {name: 'Action'} ).should == []
     end
   end
 

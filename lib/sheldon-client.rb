@@ -51,8 +51,8 @@ class SheldonClient
   #
   #    SheldonClient.search :movies, { title: 'Fist*' }
   #
-  def self.search( type, options )
-    uri = build_search_url( type, options )
+  def self.search( type, options, index=:exact )
+    uri = build_search_url( type, options, index )
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
   end
