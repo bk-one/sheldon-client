@@ -217,4 +217,42 @@ class SheldonClient
     response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
   end
 
+  #
+  # Fetches all the node ids of a given node type
+  #
+  # === Parameters
+  #
+  #   * <tt>type</tt> - The node type
+  #
+  # === Examples
+  #
+  #   SheldonClient.get_node_ids_of_type( :movies )
+  #   => [1,2,3,4,5,6,7,8, ..... ,9999]
+  #
+  def self.get_node_ids_of_type( type )
+    uri = build_node_ids_of_type_url(type)
+    response = send_request( :get, uri )
+    response.code == '200' ? JSON.parse( response.body ) : nil
+  end
+
+  #
+  # Reindexes a node in sheldon
+  #
+  # === Paremeters
+  #
+  #  * <tt>node_id</tt> - The node
+  #
+  # === Examples
+  #
+  #  SheldonClient.reindex_node( 13 )
+  #  => true
+  #
+  #  SheldonClient.reindex_node( 37 ) // Non existing node
+  #  => false
+
+  def self.reindex_node( node_id ) 
+    uri = build_reindex_url( node_id )
+    response = send_request( :put , uri )
+    response.code == '200' ? true : false
+  end
 end

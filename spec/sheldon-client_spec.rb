@@ -18,6 +18,9 @@ describe "SheldonClient" do
       SheldonClient.create_edge_url( from: 13, to: 14, type: :foo ).path.should == "/nodes/13/connections/foo/14"
       SheldonClient.create_edge_url( from: 10, to: 11, type: :bar ).path.should == "/nodes/10/connections/bar/11"
       SheldonClient.create_node_url( type: :movie ).path.should == "/nodes/movie"
+      SheldonClient.build_node_ids_of_type_url( :movies ).path.should == '/nodes/movies/ids'
+      SheldonClient.build_node_ids_of_type_url( :genres ).path.should == '/nodes/genres/ids'
+      SheldonClient.build_reindex_url( 3 ).path.should == '/nodes/3/reindex'
     end
   end
 
@@ -184,5 +187,23 @@ describe "SheldonClient" do
       SheldonClient.update_node( 500, { year: 2000 } ).should == true
     end
   end
-  
+
+  context "getting all the ids of a node type" do
+    it "should fetch all the movie ids" do
+      stub_request(:get, "http://sheldon.host/nodes/movies/ids" ).
+              with(:headers => {'Accept' => 'application/json', 'Content-Type'=>'application/json'}).
+          to_return(:status => 200, :body => [1,2,3,4,5].to_json )
+      result = SheldonClient.get_node_ids_of_type( :movies )
+      result.should == [1,2,3,4,5]
+    end
+  end
+  context "reindexing nodes" do
+    it "should send a reindex request to a node" do
+      stub_request( :put, 'http://sheldon.host/nodes/1337/reindex').
+              with(:headers => {'Accept' => 'application/json', 'Content-Type'=>'application/json'}).
+              to_return( :status => 200, :body => '')
+      result = SheldonClient.reindex_node( 1337 )
+      result.should == true
+    end
+  end
 end
