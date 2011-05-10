@@ -255,4 +255,34 @@ class SheldonClient
     response = send_request( :put , uri )
     response.code == '200' ? true : false
   end
+
+  #
+  # Fetches an edge between two nodes of a given type
+  #
+  # === Parameters
+  #
+  # * <tt>from</tt> - The source node
+  # * <tt>to</tt> - The target node
+  # * <tt>type</tt> - The edge type
+  #
+  # === Examples
+  #
+  # from = SheldonClient.search( :movies, {title: 'The Matrix} )
+  # to = SheldonClient.search( :genres, {name: 'Action'} )
+  # edge = SheldonClient.edge( from, to, 'genres' )
+  #
+
+  def self.edge( from, to, type) 
+    uri = build_fetch_edge_url( from, to, type )
+    response = send_request( :get, uri )
+    response.code == '200' ? JSON.parse( response.body ) : nil
+  end
+
+  def self.facebook_item( fbid )
+    ['users', 'movies', 'persons'].each do |type|
+      result = search( type, {facebook_ids: fbid } ).first
+      return result if result
+    end
+    nil
+  end
 end

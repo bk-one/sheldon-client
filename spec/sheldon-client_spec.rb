@@ -21,6 +21,8 @@ describe "SheldonClient" do
       SheldonClient.build_node_ids_of_type_url( :movies ).path.should == '/nodes/movies/ids'
       SheldonClient.build_node_ids_of_type_url( :genres ).path.should == '/nodes/genres/ids'
       SheldonClient.build_reindex_url( 3 ).path.should == '/nodes/3/reindex'
+      SheldonClient.build_fetch_edge_url( 13, 37, 'genre_taggings' ).path.should == '/nodes/13/connections/genre_taggings/37'
+      SheldonClient.build_fetch_edge_url( 37, 13, 'actings' ).path.should == '/nodes/37/connections/actings/13'
     end
   end
 
@@ -205,5 +207,82 @@ describe "SheldonClient" do
       result = SheldonClient.reindex_node( 1337 )
       result.should == true
     end
+  end
+  
+  context "fetching edges" do
+    it "should get one edge between two nodes of a certain edge type" do
+      stub_request( :get, 'http://sheldon.host/nodes/13/connections/actings/15').
+             with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
+        to_return( :status  => 200, :body => { 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
+      result = SheldonClient.edge(13, 15, 'actings')
+      result.should == { 'from' => '13' ,'to' => '15', 'type' => 'actings',  'payload' => { 'weight' => '0.5' } }
+    end
+    it "should get a non-existing node between two nodes" do
+      stub_request( :get, 'http://sheldon.host/nodes/13/connections/genre_taggings/15').
+             with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
+        to_return( :status  => 404, :body => '' )
+      result = SheldonClient.edge( 13, 15, 'genre_taggings' )
+      result.should == nil
+
+    end
+  end
+
+  context "fetching nodes based on facebook id regardless node type" do
+
+    it "should do one successful search" do
+     stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
+             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
+        to_return(:status => 200, :body => [{ "type" => "users", "id" => "123", 'payload'=> {'facebook_ids' =>'123456' }}].to_json, :headers => {})
+
+      result = SheldonClient.facebook_item( '123456' )
+      result.type.should == 'users'
+      result.payload['facebook_ids'].should == '123456'
+    end
+
+    it "should do a search that fails and one that is successful" do
+      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
+         to_return(:status => 200, :body => [].to_json )
+
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent' => 'Ruby'}).
+         to_return(:status => 200, :body => [{ "type" => "movies", "id" => "123" , 'payload'=> {'facebook_ids' =>'123456' }}].to_json )
+
+      result = SheldonClient.facebook_item( '123456' )
+      result.type.should == 'movies'
+      result.payload['facebook_ids'].should == '123456'
+    end
+
+    it "should do two searches that fails and one that is successful" do
+      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [].to_json )
+
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [].to_json )
+
+      stub_request(:get, "http://sheldon.host/search/nodes/persons?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [{ "type" => "persons", "id" => "123" , 'payload'=> {'facebook_ids' =>'123456' }}].to_json )
+
+      result = SheldonClient.facebook_item( '123456' )
+      result.type.should == 'persons'
+      result.payload['facebook_ids'].should == '123456'
+    end
+    it "should return nil if no node was found" do
+      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [].to_json )
+
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [].to_json )
+      stub_request(:get, "http://sheldon.host/search/nodes/persons?facebook_ids=123456").
+              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => [].to_json )
+      SheldonClient.facebook_item( '123456' ).should == nil
+    end
+
   end
 end
