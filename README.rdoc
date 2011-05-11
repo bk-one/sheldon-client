@@ -1,4 +1,4 @@
-=== sheldon-client
+= sheldon-client
 
 This is the basic library to fetch data from or store data to sheldon. This
 gem is not publicly available. To install it, check out the source, bundle
@@ -9,7 +9,7 @@ and install the gem manually, like that:
   bundle
   rake build
   
-=== Sheldon Communication
+= Sheldon Communication
 
 As this is a simple REST wrapper, we keep things fairly simple here. If
 we need a more sophisticated version of this, we should consider moving
@@ -39,17 +39,17 @@ this client for that matter) cannot deal with. Feel free to improve stability
 if necessary.
 
 
-=== Functions and example code
+= Functions and example code
 
 == Fetching node
 
 Fetch a single node object from sheldon
 
-= Parameters
+=== Parameters
 
 * <tt>id</tt> - the sheldon id
 
-= Examples
+=== Examples
 
   SheldonClient.node 17007
   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
@@ -57,12 +57,12 @@ Fetch a single node object from sheldon
 == Fetching edge
 Fetch all the edges of a certain type connected to a given node.
 
-= Parameters
+=== Parameters
 
 * <tt> node </tt> The node that we are going to fetch edges from
 * <tt> type </tt> The egde type we are interesting in
 
-= Examples
+=== Examples
 
  movie = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
  edges = SheldonClient.fetch_edges(m, 'genre_taggings')
@@ -76,11 +76,11 @@ Fetch all the edges of a certain type connected to a given node.
 == Fetching node by facebook id
 Fetches an node regardless the node type.
 
-= Parameters
+=== Parameters
 
 <tt>fbid</tt> - The facebook id
 
-= Examples
+=== Examples
 
   SheldonClient.search( '1234567' )
     => #<Sheldon::Node 17007 (Movie/Mononoke Hime)>
@@ -88,11 +88,11 @@ Fetches an node regardless the node type.
 == Creating node
 Create a new node at sheldon.
 
-= Parameters
+=== Parameters
 * <tt>options</tt> - the options to create a node. This must
   include the <tt>payload</tt>.
 
-= Examples
+=== Examples
 
 Create a new movie node
 
@@ -105,7 +105,7 @@ Create a new movie node
 == Creating edge
 Create an edge between two sheldon nodes. 
 
-= Parameters
+=== Parameters
 
 * <tt>options</tt> - the options to create an edge. This must include 
                     <tt>from</tt>, 
@@ -115,7 +115,7 @@ Create an edge between two sheldon nodes.
                     The <tt>to</tt> and <tt>from</tt> option
                     accepts a SheldonClient::Node Object or an integer.
 
-= Examples
+=== Examples
 
 Create an edge between a movie and a genre.
 
@@ -132,7 +132,7 @@ Updates the payload in a node
 * <tt>options</tt> - The options that is going to be updated in the node
   include the <tt>payload</tt>
 
-= Examples 
+=== Examples 
 
 Update a node
 
@@ -147,10 +147,10 @@ Update a node
 
 Deletes a node from the database
 
-= Parameters
+=== Parameters
 * <tt>id</tt> - The node id we want to be deleted from the database 
 
-= Examples 
+=== Examples 
  SheldonClient.delete_node(2011)
   => true
 
@@ -160,10 +160,10 @@ Deletes a node from the database
 == Deleting edge
  Deletes a edge from the database
  
-= Parameters
+=== Parameters
  * <tt>id</tt> - The edge id we want to be deleted from the database 
  
-= Examples 
+=== Examples 
   SheldonClient.delete_edge(332)
    => true
 
@@ -175,13 +175,13 @@ Deletes a node from the database
 Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
 or an empty array.
 
-= Parameters
+=== Parameters
 
 * <tt>type</tt> - plural of any known sheldon node type like :movies or :genres
 * <tt>options</tt> - the search option that will be forwarded to lucene. This depends
   on the type, see below.
 
-= Search Options
+=== Search Options
 
 Depending on the type of nodes you're searching for, different search options should
 be provided. Please refer to the sheldon documentation for the most up-to-date version
@@ -195,7 +195,7 @@ Sheldon will pass the search options to lucene, so if an option is supported and
 interpreted as exptected need to be verified by the Sheldon team. See http://bit.ly/hBpr4a
 for more information.
  
-= Examples
+=== Examples
 
 Search for a specific movie
 
@@ -213,11 +213,11 @@ And now with wildcards
 == Fetch all node ids of a certain type
 Fetches all the sheldon node ids of a given node type
 
-= Parameters
+=== Parameters
 
   * <tt>type</tt> - The node type
 
-= Examples
+=== Examples
 
   SheldonClient.get_node_ids_of_type( 'movies' )
   => [1,2,3,4,5,6,7,8, ..... ,9999]
@@ -227,11 +227,11 @@ Fetches all the sheldon node ids of a given node type
 
 Reindexes a node in sheldon
 
-= Paremeters
+=== Paremeters
 
  * <tt>node_id</tt> - The node
 
-= Examples
+=== Examples
 
  SheldonClient.reindex_node( 13 )
  => true
@@ -242,7 +242,7 @@ Reindexes a node in sheldon
 
 
 
-=== Contributing to sheldon-client
+= Contributing to sheldon-client
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
@@ -252,7 +252,7 @@ Reindexes a node in sheldon
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
-=== Copyright
+= Copyright
 
 Copyright (c) 2011 Pontus Lindstrom, Benjamin Krause. See LICENSE.txt for
 further details.
