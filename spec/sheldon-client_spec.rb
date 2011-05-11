@@ -21,7 +21,8 @@ describe "SheldonClient" do
       SheldonClient.create_node_url( type: :movie ).path.should == "/nodes/movie"
       SheldonClient.build_node_ids_of_type_url( :movies ).path.should == '/nodes/movies/ids'
       SheldonClient.build_node_ids_of_type_url( :genres ).path.should == '/nodes/genres/ids'
-      SheldonClient.build_reindex_url( 3 ).path.should == '/nodes/3/reindex'
+      SheldonClient.build_reindex_node_url( 3 ).path.should == '/nodes/3/reindex'
+      SheldonClient.build_reindex_edge_url( 3 ).path.should == '/connections/3/reindex'
       SheldonClient.build_fetch_edge_url( 13, 37, 'genre_taggings' ).path.should == '/nodes/13/connections/genre_taggings/37'
       SheldonClient.build_fetch_edge_url( 37, 13, 'actings' ).path.should == '/nodes/37/connections/actings/13'
     end
@@ -200,13 +201,28 @@ describe "SheldonClient" do
       result.should == [1,2,3,4,5]
     end
   end
-  context "reindexing nodes" do
+  context "reindexing nodes and edges" do
     it "should send a reindex request to a node" do
       stub_request( :put, 'http://sheldon.host/nodes/1337/reindex').
               with(:headers => {'Accept' => 'application/json', 'Content-Type'=>'application/json'}).
-              to_return( :status => 200, :body => '')
+              to_return( :status => 200, :body => {type: 'Movie', id: '1337', payload: { title: 'Spirited Away'} }.to_json )
       result = SheldonClient.reindex_node( 1337 )
-      result.should == true
+      result.id.should == '1337'
+      result.payload['title'].should == 'Spirited Away'
+    end
+
+    it "should send a reindex request to an edge" do
+      stub_request( :put, 'http://sheldon.host/connections/43/reindex').
+              with( :headers => { 'Accept'=>'application/json', 'Content-Type' => 'application/json', 'User-Agent'=>'Ruby'} ).
+              with( :headers => { 'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
+         to_return( :status => 200, :headers => {},:body => { 'id' => 43, 'type' => 'actings', 'from' => '13', 'to' => '14', 'payload' => { 'weight' => '0.5'}}.to_json )
+      result = SheldonClient.reindex_edge 43
+      result.id.should == 43
+      result.from.should == '13'
+      result.to.should == '14'
+      result.type.should == 'actings'
+      result.payload['weight'].should == '0.5'
+
     end
   end
   
@@ -214,9 +230,13 @@ describe "SheldonClient" do
     it "should get one edge between two nodes of a certain edge type" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/actings/15').
              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
-        to_return( :status  => 200, :body => { 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
+        to_return( :status  => 200, :body => { 'id' => 45, 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
       result = SheldonClient.edge(13, 15, 'actings')
-      result.should == { 'from' => '13' ,'to' => '15', 'type' => 'actings',  'payload' => { 'weight' => '0.5' } }
+      result.id.should == 45
+      result.from.should == '13'
+      result.to.should == '15'
+      result.type.should == 'actings'
+      result.payload['weight'].should == '0.5'
     end
     it "should get a non-existing node between two nodes" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/genre_taggings/15').
@@ -271,6 +291,7 @@ describe "SheldonClient" do
       result.type.should == 'persons'
       result.payload['facebook_ids'].should == '123456'
     end
+
     it "should return nil if no node was found" do
       stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
               with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).

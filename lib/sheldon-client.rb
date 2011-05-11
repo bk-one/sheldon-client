@@ -251,9 +251,27 @@ class SheldonClient
   #  => false
 
   def self.reindex_node( node_id ) 
-    uri = build_reindex_url( node_id )
-    response = send_request( :put , uri , {} )
-    response.code == '200' ? true : false
+    uri = build_reindex_node_url( node_id )
+    response = send_request( :put , uri )
+    response.code == '200' ? parse_node(response.body) : false
+  end
+
+  #
+  # Reindex an edge in Sheldon
+  #
+  # === Parameters
+  #
+  #  * <tt> edge_id </tt>
+  #
+  # === Examples
+  #
+  # SheldonClient.reindex_edge( 5464 )
+  #
+
+  def self.reindex_edge( edge_id )
+    uri = build_reindex_edge_url( edge_id )
+    response = send_request( :put, uri )
+    response.code == '200' ? Edge.new( JSON.parse(response.body)): false
   end
 
   #
@@ -275,7 +293,7 @@ class SheldonClient
   def self.edge( from, to, type) 
     uri = build_fetch_edge_url( from, to, type )
     response = send_request( :get, uri )
-    response.code == '200' ? JSON.parse( response.body ) : nil
+    response.code == '200' ? Edge.new( JSON.parse( response.body )) : nil
   end
 
   #

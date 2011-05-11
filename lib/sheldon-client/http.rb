@@ -42,8 +42,12 @@ class SheldonClient
        Addressable::URI.parse( self.host + "/nodes/" + type.to_s + '/ids' )
     end
 
-    def build_reindex_url( id )
+    def build_reindex_node_url( id )
       Addressable::URI.parse( self.host + '/nodes/' + id.to_s + '/reindex' )
+    end
+
+    def build_reindex_edge_url( id )
+      Addressable::URI.parse( self.host + '/connections/' + id.to_s + '/reindex' )
     end
 
     def build_fetch_edge_url( from, to, type )
