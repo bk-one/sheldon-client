@@ -1,7 +1,8 @@
 class SheldonClient
   module Configuration
     def host
-      @host || 'http://sheldon.labs.mvp.to:2311'
+      @host || "http://sheldon-production.ci-dev.moviepilot.com"
+      #@host || 'http://sheldon.labs.mvp.to:2311'
     end
 
     def host=( value )

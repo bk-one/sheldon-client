@@ -3,7 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "SheldonClient" do
   context "configuration" do
     it "should have a predefined host" do
-      SheldonClient.host.should == 'http://sheldon.labs.mvp.to:2311'
+      SheldonClient.host.should == 'http://sheldon-production.ci-dev.moviepilot.com'
+      #SheldonClient.host.should == 'http://sheldon.labs.mvp.to:2311'
     end
 
     it "should return to the configured host" do

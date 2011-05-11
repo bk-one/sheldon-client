@@ -139,7 +139,7 @@ class SheldonClient
   
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '201' ? true : false
+    response.code == '201' ? parse_node( response.body ) : nil
   end
 
   # Updates the payload in a node
@@ -252,7 +252,7 @@ class SheldonClient
 
   def self.reindex_node( node_id ) 
     uri = build_reindex_url( node_id )
-    response = send_request( :put , uri )
+    response = send_request( :put , uri , {} )
     response.code == '200' ? true : false
   end
 
@@ -277,6 +277,19 @@ class SheldonClient
     response = send_request( :get, uri )
     response.code == '200' ? JSON.parse( response.body ) : nil
   end
+
+  #
+  # Fetches an node regardless the node type.
+  #
+  # === Parameters
+  #
+  # <tt>fbid</tt> - The facebook id
+  #
+  # === Examples
+  #
+  # SheldonClient.search( '1234567' )
+  #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
+  #
 
   def self.facebook_item( fbid )
     ['users', 'movies', 'persons'].each do |type|

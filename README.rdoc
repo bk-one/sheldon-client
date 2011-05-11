@@ -1,4 +1,4 @@
-= sheldon-client
+=== sheldon-client
 
 This is the basic library to fetch data from or store data to sheldon. This
 gem is not publicly available. To install it, check out the source, bundle
@@ -9,7 +9,7 @@ and install the gem manually, like that:
   bundle
   rake build
   
-== Sheldon Communication
+=== Sheldon Communication
 
 As this is a simple REST wrapper, we keep things fairly simple here. If
 we need a more sophisticated version of this, we should consider moving
@@ -39,7 +39,210 @@ this client for that matter) cannot deal with. Feel free to improve stability
 if necessary.
 
 
-== Contributing to sheldon-client
+=== Functions and example code
+
+== Fetching node
+
+Fetch a single node object from sheldon
+
+= Parameters
+
+* <tt>id</tt> - the sheldon id
+
+= Examples
+
+  SheldonClient.node 17007
+  => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
+
+== Fetching edge
+Fetch all the edges of a certain type connected to a given node.
+
+= Parameters
+
+* <tt> node </tt> The node that we are going to fetch edges from
+* <tt> type </tt> The egde type we are interesting in
+
+= Examples
+
+ movie = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
+ edges = SheldonClient.fetch_edges(m, 'genre_taggings')
+
+ genre = SheldonClient.search(:genres, name: 'Drama').first
+ edges = SheldonClient.fetch_edges(m, 'genre_taggings')
+
+ node = SheldonClient.fetch_node( 430 )
+ edges = SheldonClient.fetch_edges(
+
+== Fetching node by facebook id
+Fetches an node regardless the node type.
+
+= Parameters
+
+<tt>fbid</tt> - The facebook id
+
+= Examples
+
+  SheldonClient.search( '1234567' )
+    => #<Sheldon::Node 17007 (Movie/Mononoke Hime)>
+
+== Creating node
+Create a new node at sheldon.
+
+= Parameters
+* <tt>options</tt> - the options to create a node. This must
+  include the <tt>payload</tt>.
+
+= Examples
+
+Create a new movie node
+
+   SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
+   => SheldonClient::Node object
+
+   SheldonClient.create_node(type: 'users', payload: { username:'Britney Spears', facebook_ids: '542032345 })
+   => SheldonClient::Node object
+
+== Creating edge
+Create an edge between two sheldon nodes. 
+
+= Parameters
+
+* <tt>options</tt> - the options to create an edge. This must include 
+                    <tt>from</tt>, 
+                    <tt>to</tt>, 
+                    <tt>type</tt> 
+                    <tt>payload</tt>. 
+                    The <tt>to</tt> and <tt>from</tt> option
+                    accepts a SheldonClient::Node Object or an integer.
+
+= Examples
+
+Create an edge between a movie and a genre.
+
+   matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
+   action = SheldonClient.search( :genres, name: 'Action').first
+   SheldonClient.create_edge {from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
+   => true
+
+
+== Updating node
+Updates the payload in a node
+
+= Parameters
+* <tt>options</tt> - The options that is going to be updated in the node
+  include the <tt>payload</tt>
+
+= Examples 
+
+Update a node
+
+  SheldonClient.update_node( 450, { payload: { year: '1999'} }
+   => true
+
+  SheldonClient.update_node( 456, { payload: { title: 'Air bud'} }
+   => true
+
+
+== Deleting Node
+
+Deletes a node from the database
+
+= Parameters
+* <tt>id</tt> - The node id we want to be deleted from the database 
+
+= Examples 
+ SheldonClient.delete_node(2011)
+  => true
+
+ SheldonClient.delete_node(201) //Non existant node
+  => false
+
+== Deleting edge
+ Deletes a edge from the database
+ 
+= Parameters
+ * <tt>id</tt> - The edge id we want to be deleted from the database 
+ 
+= Examples 
+  SheldonClient.delete_edge(332)
+   => true
+
+  SheldonClient.delete_edge(65) //Non existant edge
+   => false
+
+
+== Searching for nodes
+Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
+or an empty array.
+
+= Parameters
+
+* <tt>type</tt> - plural of any known sheldon node type like :movies or :genres
+* <tt>options</tt> - the search option that will be forwarded to lucene. This depends
+  on the type, see below.
+
+= Search Options
+
+Depending on the type of nodes you're searching for, different search options should
+be provided. Please refer to the sheldon documentation for the most up-to-date version
+of this. As of today, the following search options are supported.
+
+* <tt>movies</tt> - title, production_year
+* <tt>genres</tt> - name
+* <tt>person</tt> - name
+
+Sheldon will pass the search options to lucene, so if an option is supported and 
+interpreted as exptected need to be verified by the Sheldon team. See http://bit.ly/hBpr4a
+for more information.
+ 
+= Examples
+
+Search for a specific movie
+
+  SheldonClient.search :movies, { title: 'The Matrix' }
+  SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
+
+Search for a specific genre
+ 
+   SheldonClient.search :genres, { name: 'Action' }
+
+And now with wildcards
+
+   SheldonClient.search :movies, { title: 'Fist*' }
+
+== Fetch all node ids of a certain type
+Fetches all the sheldon node ids of a given node type
+
+= Parameters
+
+  * <tt>type</tt> - The node type
+
+= Examples
+
+  SheldonClient.get_node_ids_of_type( 'movies' )
+  => [1,2,3,4,5,6,7,8, ..... ,9999]
+
+
+== Reindex node
+
+Reindexes a node in sheldon
+
+= Paremeters
+
+ * <tt>node_id</tt> - The node
+
+= Examples
+
+ SheldonClient.reindex_node( 13 )
+ => true
+
+ SheldonClient.reindex_node( 37 ) // Non existing node
+ => false
+
+
+
+
+=== Contributing to sheldon-client
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
@@ -49,7 +252,7 @@ if necessary.
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
-== Copyright
+=== Copyright
 
 Copyright (c) 2011 Pontus Lindstrom, Benjamin Krause. See LICENSE.txt for
 further details.
