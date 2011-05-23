@@ -11,19 +11,19 @@ class SheldonClient
   extend SheldonClient::Configuration
   extend SheldonClient::HTTP
   extend SheldonClient::Search
-  
-  
+
+
   # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
   # or an empty array.
   #
   # ==== Parameters
-  # 
+  #
   # * <tt>type</tt> - plural of any known sheldon node type like :movies or :genres
   # * <tt>options</tt> - the search option that will be forwarded to lucene. This depends
   #   on the type, see below.
   #
   # ==== Search Options
-  # 
+  #
   # Depending on the type of nodes you're searching for, different search options should
   # be provided. Please refer to the sheldon documentation for the most up-to-date version
   # of this. As of today, the following search options are supported.
@@ -32,19 +32,19 @@ class SheldonClient
   # * <tt>genres</tt> - name
   # * <tt>person</tt> - name
   #
-  # Sheldon will pass the search options to lucene, so if an option is supported and 
+  # Sheldon will pass the search options to lucene, so if an option is supported and
   # interpreted as exptected need to be verified by the Sheldon team. See http://bit.ly/hBpr4a
   # for more information.
-  #  
+  #
   # ==== Examples
   #
   # Search for a specific movie
-  # 
+  #
   #   SheldonClient.search :movies, { title: 'The Matrix' }
   #   SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
   #
   # Search for a specific genre
-  #  
+  #
   #    SheldonClient.search :genres, { name: 'Action' }
   #
   # And now with wildcards
@@ -81,8 +81,8 @@ class SheldonClient
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
   end
-  
-  
+
+
   # Fetches the node with the given id
   #
   # ==== Parameters
@@ -90,7 +90,7 @@ class SheldonClient
   # * <tt> id </tt> The id of the node that is going to be fetched
   #
   # ==== Examples
-  # 
+  #
   # m = SheldonClient.fetch_node( 430 )
 
   def self.fetch_node( id )
@@ -99,12 +99,12 @@ class SheldonClient
     response.code == '200' ? parse_node(response.body) : nil
   end
 
-  # Create an edge between two sheldon nodes. 
+  # Create an edge between two sheldon nodes.
   #
   # ==== Parameters
-  # 
+  #
   # * <tt>options</tt> - the options to create an edge. This must
-  #   include <tt>from</tt>, <tt>to</tt>, <tt>type</tt> and 
+  #   include <tt>from</tt>, <tt>to</tt>, <tt>type</tt> and
   #   <tt>payload</tt>. The <tt>to</tt> and <tt>from</tt> option
   #   accepts a SheldonClient::Node Object or an integer.
   #
@@ -117,12 +117,12 @@ class SheldonClient
   #    SheldonClient.create_edge {from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
   #    => true
   #
-  
+
   def self.create_edge( options )
     response = send_request( :put, create_edge_url( options ), options[:payload] )
     response.code == '200' ? true : false
   end
-  
+
   # Create a new node at sheldon.
   #
   # ==== Parameters
@@ -136,7 +136,7 @@ class SheldonClient
   #    SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
   #    => SheldonClient::Node object
   #
-  
+
   def self.create_node( options )
     response = send_request( :post, create_node_url( options ), options[:payload] )
     response.code == '201' ? parse_node( response.body ) : nil
@@ -148,7 +148,7 @@ class SheldonClient
   # * <tt>options</tt> - The options that is going to be updated in the node
   #   include the <tt>payload</tt>
   #
-  # ==== Examples 
+  # ==== Examples
   #
   # Update a node
   #
@@ -167,34 +167,34 @@ class SheldonClient
   # Deletes a node from the database
   #
   # ==== Parameters
-  # * <tt>id</tt> - The node id we want to be deleted from the database 
+  # * <tt>id</tt> - The node id we want to be deleted from the database
   #
-  # ==== Examples 
+  # ==== Examples
   #  SheldonClient.delete_node(2011)
   #   => true
   #
   #  SheldonClient.delete_node(201) //Non existant node
   #   => false
   #
-  
+
   def self.delete_node(id)
     response = SheldonClient.send_request( :delete, build_node_url( id ) )
     response.code == '200' ? true : false
   end
-  
+
   # Deletes a edge from the database
   #
   # ==== Parameters
-  # * <tt>id</tt> - The edge id we want to be deleted from the database 
+  # * <tt>id</tt> - The edge id we want to be deleted from the database
   #
-  # ==== Examples 
+  # ==== Examples
   #  SheldonClient.delete_edge(2011)
   #   => true
   #
   #  SheldonClient.delete_edge(201) //Non existant edge
   #   => false
   #
-  
+
   def self.delete_edge(id)
     response = SheldonClient.send_request( :delete, build_edge_url( id ) )
     response.code == '200' ? true : false
@@ -212,7 +212,7 @@ class SheldonClient
   #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
   #
   def self.node( id )
-    uri = build_node_url( id ) 
+    uri = build_node_url( id )
     response = send_request( :get, uri )
     response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
   end
@@ -250,7 +250,7 @@ class SheldonClient
   #  SheldonClient.reindex_node( 37 ) // Non existing node
   #  => false
 
-  def self.reindex_node( node_id ) 
+  def self.reindex_node( node_id )
     uri = build_reindex_node_url( node_id )
     response = send_request( :put , uri )
     response.code == '200' ? parse_node(response.body) : false
@@ -290,10 +290,32 @@ class SheldonClient
   # edge = SheldonClient.edge( from, to, 'genres' )
   #
 
-  def self.edge( from, to, type) 
+  def self.edge( from, to, type)
     uri = build_fetch_edge_url( from, to, type )
     response = send_request( :get, uri )
     response.code == '200' ? Edge.new( JSON.parse( response.body )) : nil
+  end
+
+  #
+  # Updates an edge between two nodes of a given type
+  #
+  # === Parameters
+  #
+  # * <tt>from</tt> - The source node
+  # * <tt>to</tt> - The target node
+  # * <tt>type</tt> - The edge type
+  # * <tt>options</tt> - The options that is going to be updated in the edge
+  #   include the <tt>payload</tt>
+  #
+  # === Examples
+  #
+  # from = SheldonClient.search( :movies, {title: 'The Matrix} )
+  # to = SheldonClient.search( :genres, {name: 'Action'} )
+  # edge = SheldonClient.update_edge( from, to, 'genres', { payload: { weight: '0.5' }} )
+
+  def self.update_edge(from, to, type, options)
+    response = SheldonClient.send_request( :put, build_fetch_edge_url( from, to, type ), options )
+    response.code == '200' ? true : false
   end
 
   #
