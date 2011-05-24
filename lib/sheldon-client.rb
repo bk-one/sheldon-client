@@ -78,7 +78,8 @@ class SheldonClient
 
   def self.fetch_edges( node, type )
     uri = build_edge_search_url( node.id, type)
-    fetch_edge_collection( uri )
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_search_result(response.body) : []
   end
 
   # Fetch a collection of edges given an url
@@ -93,7 +94,7 @@ class SheldonClient
   #
 
   def self.fetch_edge_collection( uri )
-    response = send_request( :get, uri )
+    response = send_request( :get, build_url(uri) )
     response.code == '200' ? parse_search_result(response.body) : []
   end
 
