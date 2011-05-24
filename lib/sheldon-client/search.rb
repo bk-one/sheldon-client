@@ -35,5 +35,9 @@ class SheldonClient
     def build_node_url( node_id )
       uri = Addressable::URI.parse( self.host + "/nodes/" + node_id.to_s)
     end
+
+    def build_url( uri )
+      Addressable::URI.parse( self.host + uri )
+    end
   end
 end
