@@ -78,10 +78,24 @@ class SheldonClient
 
   def self.fetch_edges( node, type )
     uri = build_edge_search_url( node.id, type)
+    fetch_edge_collection( uri )
+  end
+
+  # Fetch a collection of edges given an url
+  #
+  # ==== Parameters
+  #
+  # * <tt> url </tt> The url where to find the edges
+  #
+  # ==== Examples
+  #
+  #  e = SheldonClient.fetch_edges("/high_scores/users/13/untracked")
+  #
+
+  def self.fetch_edge_collection( uri )
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
   end
-
 
   # Fetches the node with the given id
   #
@@ -311,7 +325,7 @@ class SheldonClient
   #
   # from = SheldonClient.search( :movies, {title: 'The Matrix} )
   # to = SheldonClient.search( :genres, {name: 'Action'} )
-  # edge = SheldonClient.update_edge( from, to, 'genres', { payload: { weight: '0.5' }} )
+  # edge = SheldonClient.f( from, to, 'genres', { payload: { weight: '0.5' }} )
 
   def self.update_edge(from, to, type, options)
     response = SheldonClient.send_request( :put, build_fetch_edge_url( from, to, type ), options )
