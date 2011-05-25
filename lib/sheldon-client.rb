@@ -94,6 +94,22 @@ class SheldonClient
   #
 
   def self.fetch_edge_collection( uri )
+    self.fetch_collection(uri)
+  end
+
+  # Fetch a collection of edges/nodes given an url.
+  #
+  # ==== Parameters
+  #
+  # * <tt> url </tt> The url where to find the objects
+  #
+  # ==== Examples
+  #
+  #  e = SheldonClient.fetch_collection("/high_scores/users/13/untracked") # fetches edges
+  #  e = SheldonClient.fetch_collection("/recommendations/users/13/containers") # fetches nodes
+  #
+
+  def self.fetch_collection( uri )
     response = send_request( :get, build_url(uri) )
     response.code == '200' ? parse_search_result(response.body) : []
   end
