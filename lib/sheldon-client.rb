@@ -176,17 +176,17 @@ class SheldonClient
   # Updates the payload in a node
   #
   # ==== Parameters
-  # * <tt>options</tt> - The options that is going to be updated in the node
-  #   include the <tt>payload</tt>
+  # * <tt>options</tt> - The options that is going to be updated in the node,
+  #   only the <tt>payload</tt>
   #
   # ==== Examples
   #
   # Update a node
   #
-  #   SheldonClient.update_node( 450, { payload: { year: '1999'} }
+  #   SheldonClient.update_node( 450, year: '1999' )
   #    => true
   #
-  #   SheldonClient.update_node( 456, { payload: { title: 'Air bud'} }
+  #   SheldonClient.update_node( 456, title: 'Air bud' )
   #    => true
 
   def self.update_node( id, options )
