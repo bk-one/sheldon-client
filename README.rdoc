@@ -31,12 +31,21 @@ consult your sheldon manual (aka jayniz) for valid edge types.
   irb > action = SheldonClient.search( :genres, name: 'Action').first
   irb > SheldonClient.create_edge from: matrix, to: action, type: 'hasGenre', payload: { weight: 1.0 }
   => true
-  
 
 Please bear in mind, that this client library does little to no validations.
 So if you get an exception, you probably passed in options that sheldon (or
 this client for that matter) cannot deal with. Feel free to improve stability
 if necessary.
+
+= Configuration
+
+There just two basic configuration settings. You can set the sheldon host
+and you can activate logging. If you omit the :log_file option, sheldon-client
+will log to stdout. 
+
+  irb > SheldonClient.host = 'http://my.sheldon/host'
+  irb > SheldonClient.log  = true
+  irb > SheldonClient.log_file = '/var/log/sheldon-slow.log'
 
 
 = Functions and example code

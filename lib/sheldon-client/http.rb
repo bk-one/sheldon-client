@@ -1,11 +1,23 @@
+require 'benchmark'
+require 'logger'
+
 class SheldonClient
   module HTTP
     def send_request( method, uri, body = nil )
-      Net::HTTP.start( uri.host, uri.port ) do |http| 
+      result = nil
+      time = Benchmark.measure do
+        result = send_request!( method, uri, body )
+      end
+      log_sheldon_request( method, uri, time ) if SheldonClient.log?
+      result
+    end
+    
+    def send_request!( method, uri, body = nil )
+      Net::HTTP.start( uri.host, uri.port ) do |http|
         http.read_timeout = 3600
         req = build_request( method, uri, body )
         default_headers(req)
-        http.request(req)
+        result = http.request(req)
       end
     end
 
@@ -52,6 +64,15 @@ class SheldonClient
 
     def build_fetch_edge_url( from, to, type )
       Addressable::URI.parse( self.host + '/nodes/' + from.to_s + '/connections/' + type.to_s + '/' + to.to_s )
+    end
+    
+    def log_sheldon_request( method, url, time )
+      log_line = "#{time.real} #{method.upcase} #{url}"
+      log_file ? get_logger.info(log_line) : puts("[#{Time.now}] #{log_line}")
+    end
+    
+    def get_logger
+      @logger ||= Logger.new(log_file)
     end
   end
 end

@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "SheldonClient" do
   context "configuration" do
     it "should have a predefined host" do
-      SheldonClient.host.should == 'http://sheldon-production.ci-dev.moviepilot.com'
+      SheldonClient.host.should == 'http://sheldon-production.ci-dev.moviepilot.com:2312'
       #SheldonClient.host.should == 'http://sheldon.labs.mvp.to:2311'
     end
 
@@ -13,9 +13,9 @@ describe "SheldonClient" do
     end
     
     it "should return the default log level (false)" do
-      SheldonClient.log.should == false
+      SheldonClient.log?.should == false
       SheldonClient.log = true
-      SheldonClient.log.should == true
+      SheldonClient.log?.should == true
       SheldonClient.log = false
     end
   end
@@ -34,7 +34,6 @@ describe "SheldonClient" do
       SheldonClient.build_fetch_edge_url( 37, 13, 'actings' ).path.should == '/nodes/37/connections/actings/13'
     end
   end
-
 
   context "create nodes in sheldon" do
      before(:each) do
@@ -75,28 +74,40 @@ describe "SheldonClient" do
       end
   end
   
+  context "create log file" do
+    it "should write a slow-log file" do
+      SheldonClient.log = true
+      SheldonClient.should_receive(:log_sheldon_request)
+      stub_request( :get, SheldonClient.host + '/nodes/13/connections/actings/15').
+             with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
+        to_return( :status  => 200, :body => { 'id' => 45, 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
+      result = SheldonClient.edge(13, 15, 'actings')
+      SheldonClient.log = false
+    end
+  end
+  
   context "delete connections in sheldon" do
-      before(:each) do
-         SheldonClient.host = 'http://sheldon.host'
-       end
+    before(:each) do
+      SheldonClient.host = 'http://sheldon.host'
+    end
 
-       it "should create a node" do
-         stub_request(:delete, "http://other.sheldon.host/connections/12").
-             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-             to_return(:status => 200)
+    it "should create a node" do
+      stub_request(:delete, "http://other.sheldon.host/connections/12").
+         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 200)
 
-         SheldonClient.host = 'http://other.sheldon.host' 
-         SheldonClient.delete_edge(12).should == true
-       end
+      SheldonClient.host = 'http://other.sheldon.host' 
+      SheldonClient.delete_edge(12).should == true
+    end
 
-       it "should return false when deleting non existance nodes" do
-         stub_request(:delete, "http://other.sheldon.host/connections/122").
-             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-             to_return(:status => 404)
+    it "should return false when deleting non existance nodes" do
+      stub_request(:delete, "http://other.sheldon.host/connections/122").
+         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+         to_return(:status => 404)
 
-         SheldonClient.host = 'http://other.sheldon.host' 
-         SheldonClient.delete_edge(122).should == false
-       end
+      SheldonClient.host = 'http://other.sheldon.host' 
+      SheldonClient.delete_edge(122).should == false
+    end
    end
   
 
@@ -208,6 +219,7 @@ describe "SheldonClient" do
       result.should == [1,2,3,4,5]
     end
   end
+
   context "reindexing nodes and edges" do
     it "should send a reindex request to a node" do
       stub_request( :put, 'http://sheldon.host/nodes/1337/reindex').
