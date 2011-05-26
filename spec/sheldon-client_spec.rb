@@ -11,6 +11,13 @@ describe "SheldonClient" do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
+    
+    it "should return the default log level (false)" do
+      SheldonClient.log.should == false
+      SheldonClient.log = true
+      SheldonClient.log.should == true
+      SheldonClient.log = false
+    end
   end
 
   context "building request urls" do

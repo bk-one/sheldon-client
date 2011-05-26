@@ -2,11 +2,18 @@ class SheldonClient
   module Configuration
     def host
       @host || "http://sheldon-production.ci-dev.moviepilot.com"
-      #@host || 'http://sheldon.labs.mvp.to:2311'
     end
 
     def host=( value )
       @host = value.chomp("/")
+    end
+    
+    def log
+      @log || false
+    end
+    
+    def log=( value )
+      @log = value
     end
   end
 end
