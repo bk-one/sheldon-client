@@ -226,8 +226,7 @@ describe "SheldonClient" do
               with(:headers => {'Accept' => 'application/json', 'Content-Type'=>'application/json'}).
               to_return( :status => 200, :body => {type: 'Movie', id: '1337', payload: { title: 'Spirited Away'} }.to_json )
       result = SheldonClient.reindex_node( 1337 )
-      result.id.should == '1337'
-      result.payload['title'].should == 'Spirited Away'
+      result.should == true
     end
 
     it "should send a reindex request to an edge" do
@@ -236,11 +235,7 @@ describe "SheldonClient" do
               with( :headers => { 'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
          to_return( :status => 200, :headers => {},:body => { 'id' => 43, 'type' => 'actings', 'from' => '13', 'to' => '14', 'payload' => { 'weight' => '0.5'}}.to_json )
       result = SheldonClient.reindex_edge 43
-      result.id.should == 43
-      result.from.should == '13'
-      result.to.should == '14'
-      result.type.should == 'actings'
-      result.payload['weight'].should == '0.5'
+      result.should == true
 
     end
   end

@@ -284,7 +284,7 @@ class SheldonClient
   def self.reindex_node( node_id )
     uri = build_reindex_node_url( node_id )
     response = send_request( :put , uri )
-    response.code == '200' ? parse_node(response.body) : false
+    response.code == '200' ? true : false
   end
 
   #
@@ -302,7 +302,7 @@ class SheldonClient
   def self.reindex_edge( edge_id )
     uri = build_reindex_edge_url( edge_id )
     response = send_request( :put, uri )
-    response.code == '200' ? Edge.new( JSON.parse(response.body)): false
+    response.code == '200' ? true : false
   end
 
   #
