@@ -69,6 +69,11 @@ class SheldonClient
     def build_status_url
       Addressable::URI.parse( self.host + '/status' )
     end
+
+    def build_high_score_url( node_id, type = nil)
+      tracked = type ? '/' + type.to_s : ''
+      Addressable::URI.parse( self.host + '/high_scores/users/' + node_id.to_s + tracked )
+    end
     
     def log_sheldon_request( method, url, time )
       log_line = "#{time.real} #{method.upcase} #{url}"

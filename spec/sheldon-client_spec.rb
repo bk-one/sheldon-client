@@ -26,13 +26,21 @@ describe "SheldonClient" do
       SheldonClient.create_edge_url( from: 13, to: 14, type: :foo ).path.should == "/nodes/13/connections/foo/14"
       SheldonClient.create_edge_url( from: 10, to: 11, type: :bar ).path.should == "/nodes/10/connections/bar/11"
       SheldonClient.create_node_url( type: :movie ).path.should == "/nodes/movie"
+
       SheldonClient.build_node_ids_of_type_url( :movies ).path.should == '/nodes/movies/ids'
       SheldonClient.build_node_ids_of_type_url( :genres ).path.should == '/nodes/genres/ids'
+
       SheldonClient.build_reindex_node_url( 3 ).path.should == '/nodes/3/reindex'
       SheldonClient.build_reindex_edge_url( 3 ).path.should == '/connections/3/reindex'
+
       SheldonClient.build_fetch_edge_url( 13, 37, 'genre_taggings' ).path.should == '/nodes/13/connections/genre_taggings/37'
       SheldonClient.build_fetch_edge_url( 37, 13, 'actings' ).path.should == '/nodes/37/connections/actings/13'
+
       SheldonClient.build_status_url.path.should == '/status'
+
+      SheldonClient.build_high_score_url( 5 ).path.should             == '/high_scores/users/5'
+      SheldonClient.build_high_score_url( 5, 'tracked').path.should   == '/high_scores/users/5/tracked'
+      SheldonClient.build_high_score_url( 5, 'untracked').path.should == '/high_scores/users/5/untracked'
     end
   end
 
@@ -323,7 +331,7 @@ describe "SheldonClient" do
 
   end
 
-  context "fetchting status of sheldon" do
+  context "fetching status of sheldon" do
     it "should fetch all the current node types supported by sheldon" do
       stub_request(:get, "http://sheldon.host/status").
         with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
@@ -356,6 +364,32 @@ describe "SheldonClient" do
                                                                          "target_class" => []}}}.to_json)
       edge_types = SheldonClient.get_edge_types
       edge_types.should == ['Acting','Like']
+    end
+  end
+
+  context "fetching high_scores" do
+    it "should fetch all the affinity edges for a user" do
+      stub_request(:get, "http://sheldon.host/high_scores/users/13").
+              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+         to_return(:status => 200 , :body => [ {id:5, from: 6, to:10, payload: {weight: 5}} ].to_json )
+      high_scores = SheldonClient.get_highscores 13
+      high_scores.should == [ {'id' => 5, 'from' => 6, 'to' => 10, 'payload' => { 'weight' => 5}} ]
+    end
+
+    it "should fetch all the tracked affinity edges for a user" do
+      stub_request(:get, "http://sheldon.host/high_scores/users/13/tracked").
+              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+         to_return(:status => 200 , :body => [ {id:5, from: 6, to:10, payload: {weight: 5}} ].to_json )
+      high_scores = SheldonClient.get_highscores_tracked 13
+      high_scores.should == [ {'id' => 5, 'from' => 6, 'to' => 10, 'payload' => { 'weight' => 5}} ]
+    end
+    
+    it "should fetch all the untracked affinity edges for a user" do
+      stub_request(:get, "http://sheldon.host/high_scores/users/13/untracked").
+              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+         to_return(:status => 200 , :body => [ {id:5, from: 6, to:1, payload: {weight: 5}} ].to_json )
+      high_scores = SheldonClient.get_highscores_untracked 13
+      high_scores.should == [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
     end
   end
 end

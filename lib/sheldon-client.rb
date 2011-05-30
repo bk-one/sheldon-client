@@ -401,4 +401,56 @@ class SheldonClient
                                        type[1].include? 'target_class'}.
                     map{|type| type[0] }
   end
+
+  #
+  # Fetches all the high score edges for a user 
+  #
+  # === Parameters
+  #
+  # <tt>id</tt> - The sheldon node id of the user
+  #
+  # === Examples
+  #
+  # SheldonClient.get_highscores 13
+  # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+  #
+
+  def self.get_highscores( id, type=nil )
+    response = SheldonClient.send_request( :get, build_high_score_url( id, type))
+    response.code == '200' ? JSON.parse( response.body ) : nil
+  end
+
+  #
+  # Fetches all the tracked high score edges for a user
+  #
+  # === Parameters
+  #
+  # <tt>id</tt> - The id of the sheldon user node
+  #
+  # === Examples
+  #
+  # SheldonClient.get_highscores_tracked 13
+  # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+  #
+  
+  def self.get_highscores_tracked( id )
+    self.get_highscores id, 'tracked'
+  end
+
+  #
+  # Fetches all the untracked high scores edges for a user
+  #
+  # === Paremeters 
+  #
+  # <tt>id</tt> - The id of the sheldon user node
+  #
+  # === Examples
+  #
+  # SheldonClient.get_highscores_untracked 13
+  # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+  #
+  
+  def self.get_highscores_untracked id
+    self.get_highscores id, 'untracked'
+  end
 end
