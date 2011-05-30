@@ -358,7 +358,7 @@ class SheldonClient
   #
   # === Examples
   #
-  # SheldonClient.search( '1234567' )
+  # SheldonClient.facebook_item( '1234567' )
   #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
   #
 
