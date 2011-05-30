@@ -364,7 +364,7 @@ class SheldonClient
 
   def self.facebook_item( fbid )
     ['users', 'movies', 'persons'].each do |type|
-      result = search( type, {facebook_ids: fbid } ).first
+      result = search( type, :facebook_ids => fbid ).first
       return result if result
     end
     nil
