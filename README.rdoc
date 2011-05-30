@@ -145,10 +145,10 @@ Updates the payload in a node
 
 Update a node
 
-  SheldonClient.update_node( 450, { payload: { year: '1999'} }
+  SheldonClient.update_node( 450, {  year: '1999'} )
    => true
 
-  SheldonClient.update_node( 456, { payload: { title: 'Air bud'} }
+  SheldonClient.update_node( 456, {  title: 'Air bud'} )
    => true
 
 
