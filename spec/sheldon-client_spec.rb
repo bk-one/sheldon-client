@@ -32,6 +32,7 @@ describe "SheldonClient" do
       SheldonClient.build_reindex_edge_url( 3 ).path.should == '/connections/3/reindex'
       SheldonClient.build_fetch_edge_url( 13, 37, 'genre_taggings' ).path.should == '/nodes/13/connections/genre_taggings/37'
       SheldonClient.build_fetch_edge_url( 37, 13, 'actings' ).path.should == '/nodes/37/connections/actings/13'
+      SheldonClient.build_status_url.path.should == '/status'
     end
   end
 
@@ -320,5 +321,41 @@ describe "SheldonClient" do
       SheldonClient.facebook_item( '123456' ).should == nil
     end
 
+  end
+
+  context "fetchting status of sheldon" do
+    it "should fetch all the current node types supported by sheldon" do
+      stub_request(:get, "http://sheldon.host/status").
+        with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+        to_return(:status => 200, :body => {"schema" => { "Movie" => {    "properties" => [],
+                                                                                "count" => 4 },
+                                                           "Person" => {   "properties" => [],
+                                                                                "count" => 6 },
+                                                           "Acting" => {   "properties" => [],
+                                                                         "source_class" => [],
+                                                                         "target_class" => []},
+                                                           "Like"    => {  "properties" => [],
+                                                                         "source_class" => [],
+                                                                         "target_class" => []}}}.to_json)
+      node_types = SheldonClient.get_node_types
+      node_types.should == ['Movie', 'Person']
+    end
+
+    it "should fetch all the current egde types supported by sheldon" do
+      stub_request( :get, "http://sheldon.host/status").
+              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+         to_return(:status => 200, :body => {"schema" => { "Movie" => {    "properties" => [],
+                                                                                "count" => 4 },
+                                                           "Person" => {   "properties" => [],
+                                                                                "count" => 6 },
+                                                           "Acting" => {   "properties" => [],
+                                                                         "source_class" => [],
+                                                                         "target_class" => []},
+                                                           "Like"    => {  "properties" => [],
+                                                                         "source_class" => [],
+                                                                         "target_class" => []}}}.to_json)
+      edge_types = SheldonClient.get_edge_types
+      edge_types.should == ['Acting','Like']
+    end
   end
 end

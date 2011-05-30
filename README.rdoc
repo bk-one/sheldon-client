@@ -248,8 +248,19 @@ Reindexes a node in sheldon
  SheldonClient.reindex_node( 37 ) // Non existing node
  => false
 
+== Fetch all node types
+Fetches all the node types supported by Sheldon
 
+=== Examples
+  SheldonClient.get_node_types
+  => ['Movie', 'Actor', 'Genre'....]  
 
+== Fetch all edge types
+Fetches all the egde types supported by Sheldon
+
+=== Examples
+  SheldonClient.get_edge_types
+  => ['Like', 'Acting'...]
 
 = Contributing to sheldon-client
  

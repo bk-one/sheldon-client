@@ -65,6 +65,10 @@ class SheldonClient
     def build_fetch_edge_url( from, to, type )
       Addressable::URI.parse( self.host + '/nodes/' + from.to_s + '/connections/' + type.to_s + '/' + to.to_s )
     end
+
+    def build_status_url
+      Addressable::URI.parse( self.host + '/status' )
+    end
     
     def log_sheldon_request( method, url, time )
       log_line = "#{time.real} #{method.upcase} #{url}"
