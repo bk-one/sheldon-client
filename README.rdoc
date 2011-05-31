@@ -64,6 +64,39 @@ Fetch a single node object from sheldon
   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
 
 == Fetching edge
+
+Fetches a single edge from shelson
+
+=== Parameters
+
+ * <tt>id</tt> - The sheldon id of the edge
+
+=== Examples
+
+  SheldonClient.edge 5
+  => #<Sheldon::Edge 5 (GenreTagging/2->1)> 
+
+
+== Checking if an edge exist
+
+Checks if an edge of a certain type exist between two 
+nodes in sheldon
+
+=== Parameters
+
+ * <tt>sheldon node</tt> - Source node
+ * <tt>sheldon node</tt> - Target node
+ * <tt>type</tt> - Edge type
+
+=== Examples
+
+  movie = SheldonClient.search(:movies, { title: 'The Matrix'} ).first
+  genre = SheldonClient.search(:genres, { name: 'Action'} ).first
+  SheldonClient.edge? movie, genre, 'genre_taggings'
+  SheldonClient.edge? 416, 190637, 'genre_taggings'
+   => #<Sheldon::Edge 6113 (GenreTagging/416->190637)>
+
+== Fetching outgoing/ingoing edges from a node
 Fetch all the edges of a certain type connected to a given node.
 
 === Parameters
@@ -74,15 +107,13 @@ Fetch all the edges of a certain type connected to a given node.
 === Examples
 
  movie = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
- edges = SheldonClient.fetch_edges(m, 'genre_taggings')
+ edges = SheldonClient.fetch_edges(movie, 'genre_taggings')
 
  genre = SheldonClient.search(:genres, name: 'Drama').first
- edges = SheldonClient.fetch_edges(m, 'genre_taggings')
-
- node = SheldonClient.fetch_node( 430 )
- edges = SheldonClient.fetch_edges(
+ edges = SheldonClient.fetch_edges(genre, 'genre_taggings')
 
 == Fetching node by facebook id
+
 Fetches an node regardless the node type.
 
 === Parameters
@@ -98,8 +129,7 @@ Fetches an node regardless the node type.
 Create a new node at sheldon.
 
 === Parameters
-* <tt>options</tt> - the options to create a node. This must
-  include the <tt>payload</tt>.
+* <tt>options</tt> - The payload for the node
 
 === Examples
 
@@ -261,6 +291,50 @@ Fetches all the egde types supported by Sheldon
 === Examples
   SheldonClient.get_edge_types
   => ['Like', 'Acting'...]
+
+
+== Fetch high score edges
+  Fetches all the high score edges for a user.
+  It can fetch all of them, tracked or the untracked
+
+=== Parameters
+  * <tt>id</tt> - The id of the sheldon user node
+  * <tt>type</tt> - 'tracked' or 'untracked', Optimal parameter. Determins which type of edges that will be returned
+
+=== Examples
+  SheldonClient.get_highscores 4
+  => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+  SheldonClient.get_highscores 4 'tracked'
+  => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+  SheldonClient.get_highscores 4 'untracked'
+  => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+
+  SheldonClient.get_highscores_tracked 4
+  => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+
+  SheldonClient.get_highscores_untracked 4
+  => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+ 
+
+== Fetchrecommendended containers
+Fetches all the recommended containers
+
+== Parameters
+
+ * <tt>id</tt> - User node id
+
+== Examples
+
+  SheldonClient.get_recommendations 4
+  => [
+      { id: "50292929"
+      , type: "Movie"
+        , payload: { title: "Matrix"
+                   , production_year: 1999
+                   , has_container: "true" }
+     ]
+  
+
 
 = Contributing to sheldon-client
  

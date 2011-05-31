@@ -321,9 +321,28 @@ class SheldonClient
   # edge = SheldonClient.edge( from, to, 'genres' )
   #
 
-  def self.edge( from, to, type)
+  def self.edge?( from, to, type)
     uri = build_fetch_edge_url( from, to, type )
     response = send_request( :get, uri )
+    response.code == '200' ? Edge.new( JSON.parse( response.body )) : nil
+  end
+
+  #
+  # Fetches a single edge from sheldon
+  #
+  # === Parameters 
+  #
+  # * <tt>id</tt> - The edge id
+  # 
+  # === Examples
+  #
+  # SheldonClient.edge 5
+  # => #<Sheldon::Edge 5 (GenreTagging/1->2)>
+  #
+
+  def self.edge( id )
+    uri = build_edge_url id
+    response =send_request( :get, uri )
     response.code == '200' ? Edge.new( JSON.parse( response.body )) : nil
   end
 
@@ -452,5 +471,23 @@ class SheldonClient
   
   def self.get_highscores_untracked id
     self.get_highscores id, 'untracked'
+  end
+
+  #
+  # Fetchets all the recommendations for a user
+  #
+  # === Parameters
+  #
+  # <tt>id</tt> - The id of the sheldon user node
+  #
+  # === Examples
+  #
+  # SheldonClient.get_recommendations 4
+  # => [{ id: "50292929", type: "Movie", payload: { title: "Matrix", production_year: 1999, has_container: "true" }}]
+  #
+  
+  def self.get_recommendations( id )
+    response = SheldonClient.send_request( :get, build_recommendation_url(id) )
+    response.code == '200' ? JSON.parse( response.body ) : nil
   end
 end

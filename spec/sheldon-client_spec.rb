@@ -41,6 +41,8 @@ describe "SheldonClient" do
       SheldonClient.build_high_score_url( 5 ).path.should             == '/high_scores/users/5'
       SheldonClient.build_high_score_url( 5, 'tracked').path.should   == '/high_scores/users/5/tracked'
       SheldonClient.build_high_score_url( 5, 'untracked').path.should == '/high_scores/users/5/untracked'
+
+      SheldonClient.build_recommendation_url( 3 ).path.should == '/recommendations/user/3/containers'
     end
   end
 
@@ -90,7 +92,7 @@ describe "SheldonClient" do
       stub_request( :get, SheldonClient.host + '/nodes/13/connections/actings/15').
              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
         to_return( :status  => 200, :body => { 'id' => 45, 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
-      result = SheldonClient.edge(13, 15, 'actings')
+      result = SheldonClient.edge?(13, 15, 'actings')
       SheldonClient.log = false
     end
   end
@@ -254,7 +256,7 @@ describe "SheldonClient" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/actings/15').
              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
         to_return( :status  => 200, :body => { 'id' => 45, 'type' => 'actings', 'from' => '13', 'to' => '15', 'payload' => { 'weight' => '0.5' }}.to_json )
-      result = SheldonClient.edge(13, 15, 'actings')
+      result = SheldonClient.edge?(13, 15, 'actings')
       result.id.should == 45
       result.from.should == '13'
       result.to.should == '15'
@@ -265,9 +267,21 @@ describe "SheldonClient" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/genre_taggings/15').
              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
         to_return( :status  => 404, :body => '' )
-      result = SheldonClient.edge( 13, 15, 'genre_taggings' )
+      result = SheldonClient.edge?( 13, 15, 'genre_taggings' )
       result.should == nil
 
+    end
+
+    it "should get a edge by its id" do
+      stub_request( :get, 'http://sheldon.host/connections/3').
+              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
+         to_return( :status => 200, :body => { id:  123, from: "8", to: "58001", type: "Acting", payload: { weight: "0.5"}}.to_json )
+      result = SheldonClient.edge 3
+      result.payload.should == { 'weight' => "0.5"}
+      result.id.to_s.should == '123'
+      result.from.to_s.should == '8'
+      result.to.to_s.should == '58001'
+      result.type.to_s.should == 'Acting'
     end
   end
 
@@ -390,6 +404,16 @@ describe "SheldonClient" do
          to_return(:status => 200 , :body => [ {id:5, from: 6, to:1, payload: {weight: 5}} ].to_json )
       high_scores = SheldonClient.get_highscores_untracked 13
       high_scores.should == [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
+    end
+  end
+
+  context "fetching recommendations" do
+    it "should fetch all the recommendations for a user from sheldon" do
+      stub_request( :get, "http://sheldon.host/recommendations/user/3/containers").
+              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
+         to_return( :status=> 200, :body => [ { id: "50292929", type: "Movie", payload: { title: "Matrix", production_year: 1999, has_container: "true" }}].to_json )
+      recommendations = SheldonClient.get_recommendations 3
+      recommendations.should == [ { 'id' => "50292929", 'type' => "Movie", 'payload' => { 'title' => "Matrix", 'production_year' => 1999, 'has_container' => "true" }}]
     end
   end
 end

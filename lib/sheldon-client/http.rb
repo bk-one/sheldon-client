@@ -74,6 +74,10 @@ class SheldonClient
       tracked = type ? '/' + type.to_s : ''
       Addressable::URI.parse( self.host + '/high_scores/users/' + node_id.to_s + tracked )
     end
+
+    def build_recommendation_url( node_id)
+      Addressable::URI.parse( self.host + '/recommendations/user/' + node_id.to_s + '/containers')
+    end
     
     def log_sheldon_request( method, url, time )
       log_line = "#{time.real} #{method.upcase} #{url}"
