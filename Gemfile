@@ -1,4 +1,5 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
+source 'http://gems.backend.moviepilot.com'
 
 gem 'addressable', '~> 2.2.0'
 
