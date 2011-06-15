@@ -511,9 +511,12 @@ class SheldonClient
   #   SheldonClient.node( 1234 ) 
   # end
   def self.with_host( host, &block )
-    SheldonClient.temp_host = host
-    yield
-    SheldonClient.temp_host = nil
+    begin
+      SheldonClient.temp_host = host
+      yield
+    ensure
+      SheldonClient.temp_host = nil
+    end
   end
 
 end
