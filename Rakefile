@@ -1,5 +1,8 @@
 require 'rubygems'
 require 'bundler'
+
+require 'rake/gem_upload'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
