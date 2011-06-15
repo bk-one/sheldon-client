@@ -77,9 +77,35 @@ class SheldonClient
   #
 
   def self.fetch_edges( node, type )
-    uri = build_edge_search_url( node.id, type)
+    node_id = node.is_a?(SheldonClient::Node) ? node.id : node
+
+    uri = build_edge_search_url( node_id, type)
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
+  end
+
+  # Fetch all the nodes connected to a given node via edges of type <edge_type>
+  #
+  # ==== Parameters
+  #
+  # * <tt> node </tt> The node that we are going to fetch neighbours from
+  # * <tt> type </tt> The egde type we are interesting in
+  #
+  # ==== Examples
+  #
+  #  m = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
+  #  e = SheldonClient.fetch_neighbours(m, 'genre_taggings')
+  #
+  #  g = SheldonClient.search(:genres, name: 'Drama').first
+  #  e = SheldonClient.fetch_neighbours(m, 'genre_taggings')
+  #
+
+  def self.fetch_neighbours( node, type )
+    node_id = node.is_a?(SheldonClient::Node) ? node.id : node
+
+    fetch_edges( node_id, type ).map do |edge|
+      fetch_node edge.to
+    end
   end
 
   # Fetch a collection of edges given an url

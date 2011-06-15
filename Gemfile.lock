@@ -1,5 +1,6 @@
 GEM
   remote: http://rubygems.org/
+  remote: http://gems.backend.moviepilot.com/
   specs:
     addressable (2.2.5)
     crack (0.1.8)
