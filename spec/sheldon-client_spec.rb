@@ -3,8 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "SheldonClient" do
   context "configuration" do
     it "should have a predefined host" do
-      SheldonClient.host.should == 'http://sheldon-production.ci-dev.moviepilot.com:2312'
-      #SheldonClient.host.should == 'http://sheldon.labs.mvp.to:2311'
+      SheldonClient.host.should == 'http://sheldon.staging.moviepilot.com:2311'
     end
 
     it "should return to the configured host" do
@@ -17,6 +16,23 @@ describe "SheldonClient" do
       SheldonClient.log = true
       SheldonClient.log?.should == true
       SheldonClient.log = false
+    end
+  end
+
+  context "temporary configuration" do
+    before(:each) do
+      SheldonClient.host = 'http://i.am.the.real.sheldon/'
+    end
+
+    it "should switch configuration temporarily" do
+      SheldonClient.host.should == 'http://i.am.the.real.sheldon'
+      SheldonClient.with_host( 'http://localhost:3000' ) do
+        stub_request(:post, "http://localhost:3000/nodes/movie").
+            with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
+                 :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
+        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 }) 
+      end
+      SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
   end
 
@@ -43,6 +59,10 @@ describe "SheldonClient" do
       SheldonClient.build_high_score_url( 5, 'untracked').path.should == '/high_scores/users/5/untracked'
 
       SheldonClient.build_recommendation_url( 3 ).path.should == '/recommendations/user/3/containers'
+      uri = SheldonClient.build_facebook_id_search_url( '123' )
+      uri.path.should == '/search'
+      uri.query_values.should == { 'facebook_ids' => '123'}
+
     end
   end
 
@@ -263,6 +283,7 @@ describe "SheldonClient" do
       result.type.should == 'actings'
       result.payload['weight'].should == '0.5'
     end
+
     it "should get a non-existing node between two nodes" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/genre_taggings/15').
              with( :headers => {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
@@ -286,63 +307,15 @@ describe "SheldonClient" do
   end
 
   context "fetching nodes based on facebook id regardless node type" do
-
     it "should do one successful search" do
-     stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
+     stub_request(:get, "http://sheldon.host/search?facebook_ids=123456").
              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
         to_return(:status => 200, :body => [{ "type" => "users", "id" => "123", 'payload'=> {'facebook_ids' =>'123456' }}].to_json, :headers => {})
 
-      result = SheldonClient.facebook_item( '123456' )
+      result = SheldonClient.facebook_item( '123456' ).first
       result.type.should == 'users'
       result.payload['facebook_ids'].should == '123456'
     end
-
-    it "should do a search that fails and one that is successful" do
-      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
-         to_return(:status => 200, :body => [].to_json )
-
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent' => 'Ruby'}).
-         to_return(:status => 200, :body => [{ "type" => "movies", "id" => "123" , 'payload'=> {'facebook_ids' =>'123456' }}].to_json )
-
-      result = SheldonClient.facebook_item( '123456' )
-      result.type.should == 'movies'
-      result.payload['facebook_ids'].should == '123456'
-    end
-
-    it "should do two searches that fails and one that is successful" do
-      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [].to_json )
-
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [].to_json )
-
-      stub_request(:get, "http://sheldon.host/search/nodes/persons?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [{ "type" => "persons", "id" => "123" , 'payload'=> {'facebook_ids' =>'123456' }}].to_json )
-
-      result = SheldonClient.facebook_item( '123456' )
-      result.type.should == 'persons'
-      result.payload['facebook_ids'].should == '123456'
-    end
-
-    it "should return nil if no node was found" do
-      stub_request(:get, "http://sheldon.host/search/nodes/users?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [].to_json )
-
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [].to_json )
-      stub_request(:get, "http://sheldon.host/search/nodes/persons?facebook_ids=123456").
-              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => [].to_json )
-      SheldonClient.facebook_item( '123456' ).should == nil
-    end
-
   end
 
   context "fetching status of sheldon" do

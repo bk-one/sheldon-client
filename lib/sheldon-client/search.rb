@@ -1,6 +1,12 @@
 class SheldonClient
   module Search
-    
+
+     def build_facebook_id_search_url( facebook_id )
+      uri = Addressable::URI.parse( self.host + "/search")
+      uri.query_values = { 'facebook_ids' => facebook_id.to_s}
+      uri
+    end
+
     protected 
     
     def parse_search_result( json_string )
@@ -27,6 +33,8 @@ class SheldonClient
       uri.query_values = query_parameters
       uri
     end
+
+
 
     def build_edge_search_url( node_id, type )
       uri = Addressable::URI.parse( self.host + "/nodes/" + node_id.to_s + "/connections/" + type.to_s )

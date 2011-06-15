@@ -382,11 +382,15 @@ class SheldonClient
   #
 
   def self.facebook_item( fbid )
-    ['users', 'movies', 'persons'].each do |type|
-      result = search( type, :facebook_ids => fbid ).first
-      return result if result
-    end
-    nil
+    uri = build_facebook_id_search_url( fbid )
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_search_result(response.body) : []
+
+#    ['users', 'movies', 'persons'].each do |type|
+#      result = search( type, :facebook_ids => fbid ).first
+#      return result if result
+#    end
+#    nil
   end
 
   #
@@ -490,4 +494,26 @@ class SheldonClient
     response = SheldonClient.send_request( :get, build_recommendation_url(id) )
     response.code == '200' ? JSON.parse( response.body ) : nil
   end
+
+  #
+  # temporarily set a different host to connect to. This 
+  # takes a block where the given sheldon node should be
+  # the one we're talking to
+  #
+  # == Parameters
+  #
+  # <tt>host</tt> - The sheldon-host (including http)
+  # <tt>block</tt> - The block that should be executed
+  #
+  # == Examples
+  #
+  # SheldonClient.with_host( "http://www.sheldon.com" ) do
+  #   SheldonClient.node( 1234 ) 
+  # end
+  def self.with_host( host, &block )
+    SheldonClient.temp_host = host
+    yield
+    SheldonClient.temp_host = nil
+  end
+
 end

@@ -1,13 +1,22 @@
 class SheldonClient
   module Configuration
     def host
-      @host || "http://sheldon-production.ci-dev.moviepilot.com:2312"
+      temp_host || @host || "http://sheldon.staging.moviepilot.com:2311"
     end
 
     def host=( value )
       @host = value.chomp("/")
     end
+
+    def temp_host=( value )
+      value = value.chomp("/") if value.is_a?(String)
+      Thread.current['SheldonClient.host'] = value
+    end
     
+    def temp_host
+      Thread.current['SheldonClient.host']
+    end
+
     def log?
       @log || false
     end
