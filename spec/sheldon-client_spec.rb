@@ -61,7 +61,7 @@ describe "SheldonClient" do
       SheldonClient.build_recommendation_url( 3 ).path.should == '/recommendations/user/3/containers'
       uri = SheldonClient.build_facebook_id_search_url( '123' )
       uri.path.should == '/search'
-      uri.query_values.should == { 'facebook_ids' => '123'}
+      uri.query_values.should == { 'q' => '123'}
 
     end
   end
@@ -308,7 +308,7 @@ describe "SheldonClient" do
 
   context "fetching nodes based on facebook id regardless node type" do
     it "should do one successful search" do
-     stub_request(:get, "http://sheldon.host/search?facebook_ids=123456").
+     stub_request(:get, "http://sheldon.host/search?q=123456").
              with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json', 'User-Agent'=>'Ruby'}).
         to_return(:status => 200, :body => [{ "type" => "users", "id" => "123", 'payload'=> {'facebook_ids' =>'123456' }}].to_json, :headers => {})
 
