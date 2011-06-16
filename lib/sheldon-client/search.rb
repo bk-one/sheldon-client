@@ -3,7 +3,8 @@ class SheldonClient
 
      def build_facebook_id_search_url( facebook_id )
       uri = Addressable::URI.parse( self.host + "/search")
-      uri.query_values = { 'facebook_ids' => facebook_id.to_s}
+      #uri.query_values = { 'facebook_ids' => facebook_id.to_s}
+      uri.query_values = { 'q' => facebook_id.to_s}
       uri
     end
 
