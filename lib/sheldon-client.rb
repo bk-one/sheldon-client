@@ -61,7 +61,7 @@ class SheldonClient
   #
   # ==== Parameters
   #
-  # * <tt> node </tt> The node that we are going to fetch edges from
+  # * <tt> node </tt> The node (or id) that we are going to fetch edges from
   # * <tt> type </tt> The egde type we are interesting in
   #
   # ==== Examples
@@ -77,7 +77,7 @@ class SheldonClient
   #
 
   def self.fetch_edges( node, type )
-    uri = build_edge_search_url( node.id, type)
+    uri = build_edge_search_url( node.to_i, type)
     response = send_request( :get, uri )
     response.code == '200' ? parse_search_result(response.body) : []
   end

@@ -12,6 +12,10 @@ class SheldonClient
       "#<Sheldon::Node #{id} (#{type}/#{name})>"
     end
     
+    def to_i
+      self.id
+    end
+    
     def name
       payload['name'] || payload['title']
     end
