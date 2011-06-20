@@ -426,12 +426,14 @@ class SheldonClient
   #  => [ 'Movie', 'Genre', 'Person', ... ]
   #
   def self.get_node_types
+    warn 'SheldonClient#get_node_types is deprecated and will be removed from sheldon-client 0.3 - please use SheldonClient#node_types'
     response = SheldonClient.send_request( :get, build_status_url )
     response.code == '200' ? status = JSON.parse( response.body) :  nil
     status['schema'].find_all{|type| not type[1].include? 'source_class' and 
                                      not type[1].include? 'target_class'}.
                     map{|type| type[0] }
   end
+  
 
   #
   # Fetches the supported edge types in Sheldon
@@ -442,6 +444,7 @@ class SheldonClient
   #   => ['Like', 'Acting' .... ]
   #
   def self.get_edge_types
+    warn 'SheldonClient#get_node_types is deprecated and will be removed from sheldon-client 0.3 - please use SheldonClient#node_types'
     response = SheldonClient.send_request( :get, build_status_url )
     response.code == '200' ? status = JSON.parse( response.body) : nil
     status['schema'].find_all{|type| type[1].include? 'source_class' and 
@@ -449,6 +452,11 @@ class SheldonClient
                     map{|type| type[0] }
   end
 
+  class << self
+    alias_method :node_types, :get_node_types
+    alias_method :edge_types, :get_edge_types
+  end
+  
   #
   # Fetches all the high score edges for a user 
   #

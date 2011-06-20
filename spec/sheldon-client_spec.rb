@@ -334,6 +334,7 @@ describe "SheldonClient" do
                                                                          "target_class" => []}}}.to_json)
       node_types = SheldonClient.get_node_types
       node_types.should == ['Movie', 'Person']
+      SheldonClient.get_node_types.should == SheldonClient.node_types
     end
 
     it "should fetch all the current egde types supported by sheldon" do
