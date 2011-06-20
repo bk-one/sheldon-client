@@ -1,14 +1,83 @@
 class SheldonClient
   module Search
+    
+    #
+    # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
+    # or an empty array.
+    #
+    # ==== Parameters
+    #
+    # * <tt>type</tt> - plural of any known sheldon node type like :movies or :genres. Pass
+    #   nil if you want to search all node-types.
+    # * <tt>options</tt> - the search option that will be forwarded to lucene. This depends
+    #   on the type, see below. options[:type] is reserved for the type of search you want
+    #   to perform. Pass :exact or :fulltext for exact or fulltext matches.
+    #
+    # ==== Search Options
+    #
+    # Depending on the type of nodes you're searching for, different search options should
+    # be provided. You can fetch the supported search keywords using the #status method 
+    # like that:
+    #
+    #    SheldonClient.status['nodes']['movie']['properties'].keys
+    #    => [ 'title', 'production_year', 'moviemaster_id', 'facebook_ids', ... ]
+    #
+    #
+    # ==== Examples
+    #
+    # Search for a specific movie
+    #
+    #   SheldonClient.search :movies, { title: 'The Matrix' }
+    #   SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
+    #
+    # Search for a specific genre
+    #
+    #    SheldonClient.search :genres, { name: 'Action' }
+    #
+    # And now with wildcards
+    #
+    #    SheldonClient.search :movies, { title: 'Fist*', type: fulltext }
+    #
+    def search( type, options = {}, search_type = :exact )
+      options[:type] = search_type unless options[:type] or search_type == :exact
+      uri = build_search_url( type, options )
+      response = send_request( :get, uri )
+      response.code == '200' ? parse_search_result(response.body) : []
+    end
+    
 
-     def build_facebook_id_search_url( facebook_id )
-      uri = Addressable::URI.parse( self.host + "/search")
-      #uri.query_values = { 'facebook_ids' => facebook_id.to_s}
-      uri.query_values = { 'q' => facebook_id.to_s}
+    #
+    # Get the sheldon node associated with the given facebook-id. This will return
+    # a node or nil, if no such node is found. 
+    #
+    # === Parameters
+    #
+    # <tt>fbid</tt> - The facebook id
+    #
+    # === Examples
+    #
+    # Fetch the sheldon node for facebook item 1234567
+    #
+    #   SheldonClient.facebook_item( '1234567' )
+    #     => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
+    #
+    def facebook_item( fbid )
+      uri = build_search_url( nil, :facebook_ids => fbid )
+      response = send_request( :get, uri )
+      response.code == '200' ? parse_search_result(response.body) : []
+    end
+
+
+
+    private 
+
+    def build_search_url( type, query_parameters )
+      uri = Addressable::URI.parse( self.host + "/search" + (type.nil? ? "" : "/nodes/#{type}") )
+      uri.query_values = query_parameters
       uri
     end
 
-    protected 
+
     
     def parse_search_result( json_string )
       JSON.parse( json_string ).map do |data|
@@ -26,13 +95,6 @@ class SheldonClient
 
     def is_edge?( data )
        data['from'] and data['to']
-    end
-
-    def build_search_url( type, query_parameters, index )
-      uri = Addressable::URI.parse( self.host + "/search/nodes/" + type.to_s )
-      query_parameters['type'] = index.to_s if index != :exact
-      uri.query_values = query_parameters
-      uri
     end
 
 

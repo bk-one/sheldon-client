@@ -16,50 +16,6 @@ class SheldonClient
   extend SheldonClient::Status
   extend SheldonClient::Deprecated
 
-  # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
-  # or an empty array.
-  #
-  # ==== Parameters
-  #
-  # * <tt>type</tt> - plural of any known sheldon node type like :movies or :genres
-  # * <tt>options</tt> - the search option that will be forwarded to lucene. This depends
-  #   on the type, see below.
-  #
-  # ==== Search Options
-  #
-  # Depending on the type of nodes you're searching for, different search options should
-  # be provided. Please refer to the sheldon documentation for the most up-to-date version
-  # of this. As of today, the following search options are supported.
-  #
-  # * <tt>movies</tt> - title, production_year
-  # * <tt>genres</tt> - name
-  # * <tt>person</tt> - name
-  #
-  # Sheldon will pass the search options to lucene, so if an option is supported and
-  # interpreted as exptected need to be verified by the Sheldon team. See http://bit.ly/hBpr4a
-  # for more information.
-  #
-  # ==== Examples
-  #
-  # Search for a specific movie
-  #
-  #   SheldonClient.search :movies, { title: 'The Matrix' }
-  #   SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
-  #
-  # Search for a specific genre
-  #
-  #    SheldonClient.search :genres, { name: 'Action' }
-  #
-  # And now with wildcards
-  #
-  #    SheldonClient.search :movies, { title: 'Fist*' }
-  #
-  def self.search( type, options, index=:exact )
-    uri = build_search_url( type, options, index )
-    response = send_request( :get, uri )
-    response.code == '200' ? parse_search_result(response.body) : []
-  end
-
   # Fetch all the edges of a certain type connected to a given node.
   #
   # ==== Parameters
@@ -393,31 +349,6 @@ class SheldonClient
   def self.update_edge(from, to, type, options)
     response = SheldonClient.send_request( :put, build_fetch_edge_url( from, to, type ), options )
     response.code == '200' ? true : false
-  end
-
-  #
-  # Fetches an node regardless the node type.
-  #
-  # === Parameters
-  #
-  # <tt>fbid</tt> - The facebook id
-  #
-  # === Examples
-  #
-  # SheldonClient.facebook_item( '1234567' )
-  #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
-  #
-
-  def self.facebook_item( fbid )
-    uri = build_facebook_id_search_url( fbid )
-    response = send_request( :get, uri )
-    response.code == '200' ? parse_search_result(response.body) : []
-
-#    ['users', 'movies', 'persons'].each do |type|
-#      result = search( type, :facebook_ids => fbid ).first
-#      return result if result
-#    end
-#    nil
   end
 
   #
