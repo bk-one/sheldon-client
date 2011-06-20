@@ -6,12 +6,15 @@ require 'sheldon-client/http'
 require 'sheldon-client/node'
 require 'sheldon-client/search'
 require 'sheldon-client/edge'
+require 'sheldon-client/status'
+require 'sheldon-client/deprecated'
 
 class SheldonClient
   extend SheldonClient::Configuration
   extend SheldonClient::HTTP
   extend SheldonClient::Search
-
+  extend SheldonClient::Status
+  extend SheldonClient::Deprecated
 
   # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
   # or an empty array.
@@ -415,38 +418,6 @@ class SheldonClient
 #      return result if result
 #    end
 #    nil
-  end
-
-  #
-  # Fetches the supported node types in Sheldon
-  #
-  # === Example
-  #
-  # SheldonClient.get_node_types
-  #  => [ 'Movie', 'Genre', 'Person', ... ]
-  #
-  def self.get_node_types
-    response = SheldonClient.send_request( :get, build_status_url )
-    response.code == '200' ? status = JSON.parse( response.body) :  nil
-    status['schema'].find_all{|type| not type[1].include? 'source_class' and 
-                                     not type[1].include? 'target_class'}.
-                    map{|type| type[0] }
-  end
-
-  #
-  # Fetches the supported edge types in Sheldon
-  #
-  #  === Example
-  #
-  #  SheldonClient.get_edge_types
-  #   => ['Like', 'Acting' .... ]
-  #
-  def self.get_edge_types
-    response = SheldonClient.send_request( :get, build_status_url )
-    response.code == '200' ? status = JSON.parse( response.body) : nil
-    status['schema'].find_all{|type| type[1].include? 'source_class' and 
-                                       type[1].include? 'target_class'}.
-                    map{|type| type[0] }
   end
 
   #

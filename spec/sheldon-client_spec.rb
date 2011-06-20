@@ -139,9 +139,8 @@ describe "SheldonClient" do
       SheldonClient.host = 'http://other.sheldon.host' 
       SheldonClient.delete_edge(122).should == false
     end
-   end
+  end
   
-
   context "creating edges in sheldon" do
     before(:each) do
       SheldonClient.host = 'http://sheldon.host'
@@ -318,39 +317,50 @@ describe "SheldonClient" do
     end
   end
 
-  context "fetching status of sheldon" do
-    it "should fetch all the current node types supported by sheldon" do
+  context "getting status information from sheldon" do
+    before(:each) do
       stub_request(:get, "http://sheldon.host/status").
         with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
-        to_return(:status => 200, :body => {"schema" => { "Movie" => {    "properties" => [],
-                                                                                "count" => 4 },
-                                                           "Person" => {   "properties" => [],
-                                                                                "count" => 6 },
-                                                           "Acting" => {   "properties" => [],
-                                                                         "source_class" => [],
-                                                                         "target_class" => []},
-                                                           "Like"    => {  "properties" => [],
-                                                                         "source_class" => [],
-                                                                         "target_class" => []}}}.to_json)
-      node_types = SheldonClient.get_node_types
-      node_types.should == ['Movie', 'Person']
+        to_return(:status => 200, :body => sheldon_status_json)
+    end
+    
+    it "should fetch all the current node and edge types supported by sheldon" do
+      SheldonClient.node_types.should == [ 'movie', 'person' ]
+      SheldonClient.edge_types.should == [ 'likes' ]
+      
+      # __TODO__ __DEPRECATED__ 0.3 deprecated methods
+      SheldonClient.get_node_types.should == [ 'movie', 'person' ]
+      SheldonClient.get_edge_types.should == [ 'likes' ]
+    end
+    
+    it "should know valid source and target node types for specific edges" do
+      SheldonClient.status['edges']['likes']['sources'].should == [ 'user' ]
+      SheldonClient.status['edges']['likes']['targets'].should == [ 'movie', 'person' ]
+    end
+    
+    it "should fetch the size of nodes/edges of a specific type" do
+      SheldonClient.status['nodes']['movie']['count'].should  == 4
+      SheldonClient.status['nodes']['person']['count'].should == 6
+      SheldonClient.status['edges']['likes']['count'].should  == 3
+    end
+    
+    it "should fetch the total amount of edges/nodes" do
+      SheldonClient.status['total']['edges']['count'].should  == 22
+      SheldonClient.status['total']['nodes']['count'].should  == 11
     end
 
-    it "should fetch all the current egde types supported by sheldon" do
-      stub_request( :get, "http://sheldon.host/status").
-              with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
-         to_return(:status => 200, :body => {"schema" => { "Movie" => {    "properties" => [],
-                                                                                "count" => 4 },
-                                                           "Person" => {   "properties" => [],
-                                                                                "count" => 6 },
-                                                           "Acting" => {   "properties" => [],
-                                                                         "source_class" => [],
-                                                                         "target_class" => []},
-                                                           "Like"    => {  "properties" => [],
-                                                                         "source_class" => [],
-                                                                         "target_class" => []}}}.to_json)
-      edge_types = SheldonClient.get_edge_types
-      edge_types.should == ['Acting','Like']
+    def sheldon_status_json
+      { "nodes" => { "movie"  => { "properties" => [ "name" => [ 'exact'] ],
+                                   "count"      => 4  },
+                     "person" => { "properties" => [],
+                                   "count"      => 6  }},
+        "edges" => { "likes"  => { "properties" => [],
+                                   "sources"    => [ 'user' ],
+                                   "targets"    => [ 'movie', 'person' ],
+                                   "count"      => 3  }},
+        "total" => { "edges"  => { "count"      => 22 },
+                     "nodes"  => { "count"      => 11 }}
+      }.to_json
     end
   end
 
