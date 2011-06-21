@@ -1,5 +1,6 @@
 class SheldonClient
   module Status
+    TYPES = [:edge, :node]
 
     #
     # Get the sheldon status json hash including some basic
@@ -50,7 +51,6 @@ class SheldonClient
     def edge_types
       status['edges'].keys
     end
-
 
     private
 
