@@ -113,47 +113,26 @@ class SheldonClient
     response.code == '200' ? parse_node(response.body) : nil
   end
 
-  # Create an edge between two sheldon nodes.
+  # Create a Node or Edge at sheldon.
   #
-  # ==== Parameters
-  #
-  # * <tt>options</tt> - the options to create an edge. This must
-  #   include <tt>from</tt>, <tt>to</tt>, <tt>type</tt> and
-  #   <tt>payload</tt>. The <tt>to</tt> and <tt>from</tt> option
-  #   accepts a SheldonClient::Node Object or an integer.
-  #
-  # ==== Examples
-  #
-  # Create an edge between a movie and a genre.
-  #
-  #    matrix = SheldonClient.search( :movies, title: 'The Matrix' ).first
-  #    action = SheldonClient.search( :genres, name: 'Action').first
-  #    SheldonClient.create_edge {from: matrix, to: action, type: 'genretagging', payload: { weight: 1.0 }
-  #    => true
-  #
-
-  def self.create_edge( options )
-    response = send_request( :put, create_edge_url( options ), options[:payload] )
-    response.code == '200' ? true : false
-  end
-
-  # Create a new node at sheldon.
-  #
-  # ==== Parameters
-  # * <tt>options</tt> - the options to create a node. This must
-  #   include the <tt>payload</tt>.
-  #
-  # ==== Examples
-  #
+  # ===  Examples
   # Create a new node
+  # SheldonClient.create :node, { type: :movie, payload: { title: "Pulp Fiction" }}
   #
-  #    SheldonClient.create_node(type: :movie, payload: { title: "Full Metal Jacket" })
-  #    => SheldonClient::Node object
-  #
+  # Create a new edge
+  # SheldonClient.create :edge, { type: :like,
+  #                               from: 123,
+  #                               to: 321,
+  #                               payload: { weight: 0.5 } }
 
-  def self.create_node( options )
-    response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '201' ? parse_node( response.body ) : nil
+  def self.create(type, options)
+    validate_type_and_options(type, options)
+    case type
+    when :node
+      dispatch_node_creation(options)
+    when :edge
+      dispatch_edge_creation(options)
+    end
   end
 
   # Updates the payload in a node
@@ -445,4 +424,22 @@ class SheldonClient
     end
   end
 
+  private
+
+  def self.dispatch_node_creation(options)
+    response = send_request( :post, create_node_url( options ), options[:payload] )
+    response.code == '201' ? parse_node( response.body ) : nil
+  end
+
+  def self.dispatch_edge_creation(options)
+    response = send_request( :put, create_edge_url( options ), options[:payload] )
+    response.code == '200' ? true : false
+  end
+
+  # PENDING: Given the type validate the options
+  def self.validate_type_and_options(type, options)
+    unless SheldonClient::Status::TYPES.include?(type)
+      raise ArgumentError, 'Unknown type'
+    end
+  end
 end

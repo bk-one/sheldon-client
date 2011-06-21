@@ -1,9 +1,11 @@
 require 'spec_helper'
 
 describe SheldonClient do
+  include WebMockSupport
+
   context "configuration" do
     it "should have a predefined host" do
-      SheldonClient.host.should == 'http://sheldon.staging.moviepilot.com:2311'
+      SheldonClient.host.should == 'http://46.4.114.22:2311'
     end
 
     it "should return to the configured host" do
@@ -19,6 +21,47 @@ describe SheldonClient do
     end
   end
 
+  describe "SheldonClient.create" do
+    before(:each) do
+      @host_url = "http://sheldon.host"
+      SheldonClient.host = @host_url
+    end
+
+    it "should raise and exception if the given type is not valid" do
+      lambda {
+        SheldonClient.create :invalid_type, {}
+      }.should raise_error(ArgumentError, 'Unknown type')
+    end
+
+    it "should make the correct http call  when creating a node" do
+      url = "#{@host_url}/nodes/movie"
+      with_options = {:headers => { 'Accept'=>'application/json',
+                                    'Content-Type'=>'application/json'},
+                       :body   => { :weight => 1.0 }.to_json }
+      result = {:status => 200}
+
+      stub_and_expect_request(:post, url, with_options, result) do
+        SheldonClient.create :node, { type: :movie, payload: { weight: 1.0 } }
+      end
+    end
+
+    it "should make the correct http call when creating an edge" do
+      url = "#{@host_url}/nodes/13/connections/movies_genres/14"
+      with_options = { :headers => { 'Accept'=>'application/json',
+                                     'Content-Type'=>'application/json' },
+                       :body    => { :weight => 1.0 }.to_json }
+      result = {:status => 200}
+
+      stub_and_expect_request(:put, url, with_options, result) do
+        SheldonClient.create :edge,
+                             { from: 13,
+                               to: 14,
+                               type: :movies_genres,
+                               payload: { weight: 1.0 } }
+      end
+    end
+  end
+
   context "temporary configuration" do
     before(:each) do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
@@ -26,12 +69,19 @@ describe SheldonClient do
 
     it "should switch configuration temporarily" do
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
-      SheldonClient.with_host( 'http://localhost:3000' ) do
-        stub_request(:post, "http://localhost:3000/nodes/movie").
-          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-               :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
-        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 })
+
+      url  = "http://localhost:3000/nodes/movie"
+      with_options = { :headers => {'Accept'=>'application/json',
+                                    'Content-Type'=>'application/json'},
+                       :body    => { :weight => 1.0 }.to_json }
+      result = { :status => 200 }
+
+      stub_and_expect_request(:post, url, with_options, result) do
+        SheldonClient.with_host( 'http://localhost:3000' ) do
+          SheldonClient.create :node, { type: :movie, payload: { weight: 1.0 } }
+        end
       end
+
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
   end
@@ -65,21 +115,6 @@ describe SheldonClient do
       SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :type => :fulltext).request_uri.should ==
         "/search/nodes/movies?title=Matrix&type=fulltext"
 
-    end
-  end
-
-  context "create nodes in sheldon" do
-    before(:each) do
-      SheldonClient.host = 'http://sheldon.host'
-    end
-
-    it "should create a node" do
-      stub_request(:post, "http://other.sheldon.host/nodes/movie").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-             :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
-
-      SheldonClient.host = 'http://other.sheldon.host'
-      SheldonClient.create_node( type: :movie, payload: { weight: 1.0 })
     end
   end
 
@@ -149,39 +184,32 @@ describe SheldonClient do
     end
 
     it "should create an request to create an edge" do
-      stub_request(:put, "http://sheldon.host/nodes/13/connections/movies_genres/14").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-             :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
+      url = "http://sheldon.host/nodes/13/connections/movies_genres/14"
+      with_options = { :headers => {'Accept'=>'application/json',
+                                    'Content-Type'=>'application/json' },
+                       :body    => { :weight => 1.0 }.to_json }
+      result = {:status => 200}
 
-      SheldonClient.create_edge( from: 13, to: 14, type: :movies_genres, payload: { weight: 1.0 } )
-    end
-
-    it "should be able to talk to a different host" do
-      stub_request(:put, "http://other.sheldon.host/nodes/10/connections/movies_genres/11").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-             :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
-
-      SheldonClient.host = 'http://other.sheldon.host'
-      SheldonClient.create_edge( from: 10, to: 11, type: :movies_genres, payload: { weight: 1.0 } )
-    end
-
-    it "should include the right payload" do
-      stub_request(:put, "http://other.sheldon.host/nodes/10/connections/movies_genres/11").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-             :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
-
-      SheldonClient.host = 'http://other.sheldon.host'
-      SheldonClient.create_edge( from: 10, to: 11, type: :movies_genres, payload: { weight: 0.4 } )
+      stub_and_expect_request(:put, url, with_options, result) do
+        SheldonClient.create :edge, { from: 13, to: 14, type: :movies_genres, payload: { weight: 1.0 }}
+      end
     end
 
     it "should create edges from node objects" do
-      stub_request(:put, "http://sheldon.host/nodes/123/connections/movies_genres/321").
-        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
-             :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
+      url = "http://sheldon.host/nodes/123/connections/movies_genres/321"
+      with_options = { :headers => {'Accept'=>'application/json',
+                                    'Content-Type'=>'application/json' },
+                       :body    => { :weight => 0.4 }.to_json }
+      result = {:status => 200}
 
-      SheldonClient.create_edge( from: SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'}),
-                                 to: SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'}),
-                                 type: :movies_genres, payload: { weight: 0.4 } )
+      stub_and_expect_request(:put, url, with_options, result) do
+        node1 = SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'})
+        node2 = SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'})
+        SheldonClient.create :edge, { from: node1,
+                                      to: node2,
+                                      type: :movies_genres,
+                                      payload: { weight: 0.4 }}
+      end
     end
   end
 
