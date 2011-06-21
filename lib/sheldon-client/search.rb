@@ -1,6 +1,6 @@
 class SheldonClient
   module Search
-    
+
     #
     # Search for Sheldon Nodes. This will return an array of SheldonClient::Node Objects
     # or an empty array.
@@ -16,7 +16,7 @@ class SheldonClient
     # ==== Search Options
     #
     # Depending on the type of nodes you're searching for, different search options should
-    # be provided. You can fetch the supported search keywords using the #status method 
+    # be provided. You can fetch the supported search keywords using the #status method
     # like that:
     #
     #    SheldonClient.status['nodes']['movie']['properties'].keys
@@ -44,11 +44,11 @@ class SheldonClient
       response = send_request( :get, uri )
       response.code == '200' ? parse_search_result(response.body) : []
     end
-    
+
 
     #
     # Get the sheldon node associated with the given facebook-id. This will return
-    # a node or nil, if no such node is found. 
+    # a node or nil, if no such node is found.
     #
     # === Parameters
     #
@@ -69,7 +69,7 @@ class SheldonClient
 
 
 
-    private 
+    private
 
     def build_search_url( type, query_parameters )
       uri = Addressable::URI.parse( self.host + "/search" + (type.nil? ? "" : "/nodes/#{type}") )
@@ -78,7 +78,7 @@ class SheldonClient
     end
 
 
-    
+
     def parse_search_result( json_string )
       JSON.parse( json_string ).map do |data|
         if is_edge?( data )
@@ -88,7 +88,7 @@ class SheldonClient
         end
       end
     end
-    
+
     def parse_node(json_string)
       Node.new JSON.parse( json_string )
     end

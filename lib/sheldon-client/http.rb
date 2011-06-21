@@ -11,7 +11,7 @@ class SheldonClient
       log_sheldon_request( method, uri, time ) if SheldonClient.log?
       result
     end
-    
+
     def send_request!( method, uri, body = nil )
       Net::HTTP.start( uri.host, uri.port ) do |http|
         http.read_timeout = 3600
@@ -37,7 +37,7 @@ class SheldonClient
       to   = options[:to].is_a?(Node) ? options[:to].id : options[:to].to_i
       Addressable::URI.parse( self.host + "/nodes/#{from}/connections/#{options[:type]}/#{to}" )
     end
-    
+
     def create_node_url(options)
       Addressable::URI.parse( self.host + "/nodes/#{options[:type]}" )
     end
@@ -45,7 +45,7 @@ class SheldonClient
     def build_node_url( id )
        Addressable::URI.parse( self.host + "/nodes/" + id.to_s )
     end
-    
+
     def build_edge_url( id )
        Addressable::URI.parse( self.host + "/connections/" + id.to_s )
     end
@@ -78,12 +78,12 @@ class SheldonClient
     def build_recommendation_url( node_id)
       Addressable::URI.parse( self.host + '/recommendations/user/' + node_id.to_s + '/containers')
     end
-    
+
     def log_sheldon_request( method, url, time )
       log_line = "#{time.real} #{method.upcase} #{url}"
       log_file ? get_logger.info(log_line) : puts("[#{Time.now}] #{log_line}")
     end
-    
+
     def get_logger
       @logger ||= Logger.new(log_file)
     end

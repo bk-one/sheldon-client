@@ -313,10 +313,10 @@ class SheldonClient
   #
   # Fetches a single edge from sheldon
   #
-  # === Parameters 
+  # === Parameters
   #
   # * <tt>id</tt> - The edge id
-  # 
+  #
   # === Examples
   #
   # SheldonClient.edge 5
@@ -352,7 +352,7 @@ class SheldonClient
   end
 
   #
-  # Fetches all the high score edges for a user 
+  # Fetches all the high score edges for a user
   #
   # === Parameters
   #
@@ -381,7 +381,7 @@ class SheldonClient
   # SheldonClient.get_highscores_tracked 13
   # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
   #
-  
+
   def self.get_highscores_tracked( id )
     self.get_highscores id, 'tracked'
   end
@@ -389,7 +389,7 @@ class SheldonClient
   #
   # Fetches all the untracked high scores edges for a user
   #
-  # === Paremeters 
+  # === Paremeters
   #
   # <tt>id</tt> - The id of the sheldon user node
   #
@@ -398,7 +398,7 @@ class SheldonClient
   # SheldonClient.get_highscores_untracked 13
   # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
   #
-  
+
   def self.get_highscores_untracked id
     self.get_highscores id, 'untracked'
   end
@@ -415,14 +415,14 @@ class SheldonClient
   # SheldonClient.get_recommendations 4
   # => [{ id: "50292929", type: "Movie", payload: { title: "Matrix", production_year: 1999, has_container: "true" }}]
   #
-  
+
   def self.get_recommendations( id )
     response = SheldonClient.send_request( :get, build_recommendation_url(id) )
     response.code == '200' ? JSON.parse( response.body ) : nil
   end
 
   #
-  # temporarily set a different host to connect to. This 
+  # temporarily set a different host to connect to. This
   # takes a block where the given sheldon node should be
   # the one we're talking to
   #
@@ -434,7 +434,7 @@ class SheldonClient
   # == Examples
   #
   # SheldonClient.with_host( "http://www.sheldon.com" ) do
-  #   SheldonClient.node( 1234 ) 
+  #   SheldonClient.node( 1234 )
   # end
   def self.with_host( host, &block )
     begin
