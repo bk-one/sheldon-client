@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require 'spec_helper'
 
 describe "SheldonClient" do
   context "configuration" do
@@ -10,7 +10,7 @@ describe "SheldonClient" do
       SheldonClient.host = 'http://i.am.the.real.sheldon/'
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
-    
+
     it "should return the default log level (false)" do
       SheldonClient.log?.should == false
       SheldonClient.log = true
@@ -30,7 +30,7 @@ describe "SheldonClient" do
         stub_request(:post, "http://localhost:3000/nodes/movie").
             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                  :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
-        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 }) 
+        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 })
       end
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
     end
@@ -59,10 +59,10 @@ describe "SheldonClient" do
       SheldonClient.build_high_score_url( 5, 'untracked').path.should == '/high_scores/users/5/untracked'
 
       SheldonClient.build_recommendation_url( 3 ).request_uri.should == '/recommendations/user/3/containers'
-      
+
       SheldonClient.send(:build_search_url, nil, :facebook_ids => '123').request_uri.should == "/search?facebook_ids=123"
       SheldonClient.send(:build_search_url, :movies, :title => 'Matrix').request_uri.should == "/search/nodes/movies?title=Matrix"
-      SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :type => :fulltext).request_uri.should == 
+      SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :type => :fulltext).request_uri.should ==
         "/search/nodes/movies?title=Matrix&type=fulltext"
 
     end
@@ -72,41 +72,41 @@ describe "SheldonClient" do
      before(:each) do
         SheldonClient.host = 'http://sheldon.host'
       end
-      
+
       it "should create a node" do
         stub_request(:post, "http://other.sheldon.host/nodes/movie").
             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                  :body    => { :weight => 1.0 }.to_json).to_return(:status => 200)
 
-        SheldonClient.host = 'http://other.sheldon.host' 
-        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 }) 
+        SheldonClient.host = 'http://other.sheldon.host'
+        SheldonClient.create_node( type: :movie, payload: { weight: 1.0 })
       end
   end
-  
+
   context "delete nodes in sheldon" do
      before(:each) do
         SheldonClient.host = 'http://sheldon.host'
       end
-      
+
       it "should create a node" do
         stub_request(:delete, "http://other.sheldon.host/nodes/12").
             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
             to_return(:status => 200)
 
-        SheldonClient.host = 'http://other.sheldon.host' 
+        SheldonClient.host = 'http://other.sheldon.host'
         SheldonClient.delete_node(12).should == true
       end
-      
+
       it "should return false when deleting non existance nodes" do
         stub_request(:delete, "http://other.sheldon.host/nodes/122").
             with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
             to_return(:status => 404)
 
-        SheldonClient.host = 'http://other.sheldon.host' 
+        SheldonClient.host = 'http://other.sheldon.host'
         SheldonClient.delete_node(122).should == false
       end
   end
-  
+
   context "create log file" do
     it "should write a slow-log file" do
       SheldonClient.log = true
@@ -118,7 +118,7 @@ describe "SheldonClient" do
       SheldonClient.log = false
     end
   end
-  
+
   context "delete connections in sheldon" do
     before(:each) do
       SheldonClient.host = 'http://sheldon.host'
@@ -129,7 +129,7 @@ describe "SheldonClient" do
          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
          to_return(:status => 200)
 
-      SheldonClient.host = 'http://other.sheldon.host' 
+      SheldonClient.host = 'http://other.sheldon.host'
       SheldonClient.delete_edge(12).should == true
     end
 
@@ -138,11 +138,11 @@ describe "SheldonClient" do
          with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
          to_return(:status => 404)
 
-      SheldonClient.host = 'http://other.sheldon.host' 
+      SheldonClient.host = 'http://other.sheldon.host'
       SheldonClient.delete_edge(122).should == false
     end
   end
-  
+
   context "creating edges in sheldon" do
     before(:each) do
       SheldonClient.host = 'http://sheldon.host'
@@ -178,8 +178,8 @@ describe "SheldonClient" do
       stub_request(:put, "http://sheldon.host/nodes/123/connections/movies_genres/321").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'},
                :body    => { :weight => 0.4 }.to_json).to_return(:status => 200)
-               
- 	    SheldonClient.create_edge( from: SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'}), 
+
+ 	    SheldonClient.create_edge( from: SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'}),
  	                                 to: SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'}),
  	                               type: :movies_genres, payload: { weight: 0.4 } )
     end
@@ -190,29 +190,29 @@ describe "SheldonClient" do
       stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix&type=fulltext").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
-          
+
       result = SheldonClient.search( :movies, {title: 'Matrix', production_year: '1999'}, :fulltext )
       result.first.should be_a SheldonClient::Node
       result.first.id.should == "123"
       result.first.type.should == 'Movie'
     end
-    
+
     it "should search for genres" do
       stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => [{ "type" => "Genre", "id" => "321" }].to_json )
-          
+
       result = SheldonClient.search( :genres, {name: 'Action'} )
       result.first.should be_a SheldonClient::Node
       result.first.id.should == "321"
       result.first.type.should == 'Genre'
     end
-    
+
     it "should return an empty array on no-content responses" do
       stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 204, :body => '' )
-          
+
       SheldonClient.search( :genres, {name: 'Action'} ).should == []
     end
   end
@@ -222,7 +222,7 @@ describe "SheldonClient" do
       stub_request(:get, "http://sheldon.host/nodes/2001").
           with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
           to_return(:status => 200, :body => { "type" => "Movie", "id" => "123", "payload" => { "title" => "MyTitle" } }.to_json )
-      
+
       result = SheldonClient.node( 2001 )
       result.should be_a SheldonClient::Node
       result.id.should == "123"
@@ -271,7 +271,7 @@ describe "SheldonClient" do
 
     end
   end
-  
+
   context "fetching edges" do
     it "should get one edge between two nodes of a certain edge type" do
       stub_request( :get, 'http://sheldon.host/nodes/13/connections/actings/15').
@@ -325,27 +325,27 @@ describe "SheldonClient" do
         with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
         to_return(:status => 200, :body => sheldon_status_json)
     end
-    
+
     it "should fetch all the current node and edge types supported by sheldon" do
       SheldonClient.node_types.should == [ 'movie', 'person' ]
       SheldonClient.edge_types.should == [ 'likes' ]
-      
+
       # __TODO__ __DEPRECATED__ 0.3 deprecated methods
       SheldonClient.get_node_types.should == [ 'movie', 'person' ]
       SheldonClient.get_edge_types.should == [ 'likes' ]
     end
-    
+
     it "should know valid source and target node types for specific edges" do
       SheldonClient.status['edges']['likes']['sources'].should == [ 'user' ]
       SheldonClient.status['edges']['likes']['targets'].should == [ 'movie', 'person' ]
     end
-    
+
     it "should fetch the size of nodes/edges of a specific type" do
       SheldonClient.status['nodes']['movie']['count'].should  == 4
       SheldonClient.status['nodes']['person']['count'].should == 6
       SheldonClient.status['edges']['likes']['count'].should  == 3
     end
-    
+
     it "should fetch the total amount of edges/nodes" do
       SheldonClient.status['total']['edges']['count'].should  == 22
       SheldonClient.status['total']['nodes']['count'].should  == 11
@@ -382,7 +382,7 @@ describe "SheldonClient" do
       high_scores = SheldonClient.get_highscores_tracked 13
       high_scores.should == [ {'id' => 5, 'from' => 6, 'to' => 10, 'payload' => { 'weight' => 5}} ]
     end
-    
+
     it "should fetch all the untracked affinity edges for a user" do
       stub_request(:get, "http://sheldon.host/high_scores/users/13/untracked").
               with( :headers => {'Accept' =>'application/json', 'Content-Type'=> 'application/json'}).
