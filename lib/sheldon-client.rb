@@ -130,6 +130,8 @@ class SheldonClient
     case type
     when :node
       dispatch_node_creation(options)
+    when :connection
+      dispatch_edge_creation(options)
     when :edge
       dispatch_edge_creation(options)
     end

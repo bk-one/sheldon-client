@@ -1,6 +1,6 @@
 class SheldonClient
   module Status
-    TYPES = [:edge, :node]
+    TYPES = [:edge, :connection, :node]
 
     #
     # Get the sheldon status json hash including some basic
