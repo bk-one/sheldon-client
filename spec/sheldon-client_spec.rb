@@ -346,41 +346,39 @@ describe SheldonClient do
     end
 
     it "should fetch all the current node and edge types supported by sheldon" do
-      SheldonClient.node_types.should == [ 'movie', 'person' ]
+      SheldonClient.node_types.should == [ 'movies', 'persons' ]
       SheldonClient.edge_types.should == [ 'likes' ]
 
       # __TODO__ __DEPRECATED__ 0.3 deprecated methods
-      SheldonClient.get_node_types.should == [ 'movie', 'person' ]
+      SheldonClient.get_node_types.should == [ 'movies', 'persons' ]
       SheldonClient.get_edge_types.should == [ 'likes' ]
     end
 
     it "should know valid source and target node types for specific edges" do
-      SheldonClient.status['edges']['likes']['sources'].should == [ 'user' ]
-      SheldonClient.status['edges']['likes']['targets'].should == [ 'movie', 'person' ]
+      SheldonClient.status['schema']['connections']['likes']['sources'].should == [ 'users' ]
+      SheldonClient.status['schema']['connections']['likes']['targets'].should == [ 'movies', 'persons' ]
     end
 
     it "should fetch the size of nodes/edges of a specific type" do
-      SheldonClient.status['nodes']['movie']['count'].should  == 4
-      SheldonClient.status['nodes']['person']['count'].should == 6
-      SheldonClient.status['edges']['likes']['count'].should  == 3
+      SheldonClient.status['schema']['nodes']['movies']['count'].should  == 4
+      SheldonClient.status['schema']['nodes']['persons']['count'].should == 6
+      SheldonClient.status['schema']['connections']['likes']['count'].should  == 3
     end
 
-    it "should fetch the total amount of edges/nodes" do
-      SheldonClient.status['total']['edges']['count'].should  == 22
-      SheldonClient.status['total']['nodes']['count'].should  == 11
+    xit "should fetch the total amount of edges/nodes" do
+      SheldonClient.status['schema']['connections']['count'].should  == 22
+      SheldonClient.status['schema']['nodes']['count'].should  == 11
     end
 
     def sheldon_status_json
-      { "nodes" => { "movie"  => { "properties" => [ "name" => [ 'exact'] ],
-            "count"      => 4  },
-          "person" => { "properties" => [],
-            "count"      => 6  }},
-        "edges" => { "likes"  => { "properties" => [],
-            "sources"    => [ 'user' ],
-            "targets"    => [ 'movie', 'person' ],
-            "count"      => 3  }},
-        "total" => { "edges"  => { "count"      => 22 },
-          "nodes"  => { "count"      => 11 }}
+      { "schema" => { "nodes"       => { "movies"  => { "properties" => [ "name" => [ 'exact' ] ],
+                                                        "count"      => 4  },
+                                         "persons" => { "properties" => [],
+                                                        "count"      => 6  }},
+                      "connections" => { "likes"  => { "properties" => [],
+                                                       "sources"    => [ 'users' ],
+                                                       "targets"    => [ 'movies', 'persons' ],
+                                                       "count"      => 3  }}}
       }.to_json
     end
   end

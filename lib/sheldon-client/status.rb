@@ -28,7 +28,7 @@ class SheldonClient
     # SheldonClient.status['nodes']['movie']['properties']
     # => { "name" => [ "case_insensitive_exact" ] }
     def node_types
-      status['nodes'].keys
+      status['schema']['nodes'].keys
     end
 
 
@@ -49,7 +49,7 @@ class SheldonClient
     # SheldonClient.status['edges']['likes']['targets']
     # => [ 'movie', 'person' ]
     def edge_types
-      status['edges'].keys
+      status['schema']['connections'].keys
     end
 
     private
