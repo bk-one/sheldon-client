@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe SheldonClient do
   include WebMockSupport
+  include HttpSupport
 
   context "configuration" do
     it "should have a predefined host" do
@@ -34,25 +35,21 @@ describe SheldonClient do
     end
 
     it "should make the correct http call  when creating a node" do
-      url = "#{@host_url}/nodes/movie"
-      with_options = {:headers => { 'Accept'=>'application/json',
-                                    'Content-Type'=>'application/json'},
-                       :body   => { :weight => 1.0 }.to_json }
-      result = {:status => 200}
+      options = with_options({:weight => 1.0 }.to_json)
+      result  = {:status => 200}
+      url     = "#{@host_url}/nodes/movie"
 
-      stub_and_expect_request(:post, url, with_options, result) do
+      stub_and_expect_request(:post, url, options, result) do
         SheldonClient.create :node, { type: :movie, payload: { weight: 1.0 } }
       end
     end
 
     it "should make the correct http call when creating an edge" do
-      url = "#{@host_url}/nodes/13/connections/movies_genres/14"
-      with_options = { :headers => { 'Accept'=>'application/json',
-                                     'Content-Type'=>'application/json' },
-                       :body    => { :weight => 1.0 }.to_json }
-      result = {:status => 200}
+      options = with_options({:weight => 1.0 }.to_json)
+      result  = {:status => 200}
+      url     = "#{@host_url}/nodes/13/connections/movies_genres/14"
 
-      stub_and_expect_request(:put, url, with_options, result) do
+      stub_and_expect_request(:put, url, options, result) do
         SheldonClient.create :edge,
                              { from: 13,
                                to: 14,
@@ -70,13 +67,11 @@ describe SheldonClient do
     it "should switch configuration temporarily" do
       SheldonClient.host.should == 'http://i.am.the.real.sheldon'
 
-      url  = "http://localhost:3000/nodes/movie"
-      with_options = { :headers => {'Accept'=>'application/json',
-                                    'Content-Type'=>'application/json'},
-                       :body    => { :weight => 1.0 }.to_json }
+      options = with_options( { :weight => 1.0 }.to_json )
       result = { :status => 200 }
+      url  = "http://localhost:3000/nodes/movie"
 
-      stub_and_expect_request(:post, url, with_options, result) do
+      stub_and_expect_request(:post, url, options, result) do
         SheldonClient.with_host( 'http://localhost:3000' ) do
           SheldonClient.create :node, { type: :movie, payload: { weight: 1.0 } }
         end
@@ -184,25 +179,21 @@ describe SheldonClient do
     end
 
     it "should create an request to create an edge" do
-      url = "http://sheldon.host/nodes/13/connections/movies_genres/14"
-      with_options = { :headers => {'Accept'=>'application/json',
-                                    'Content-Type'=>'application/json' },
-                       :body    => { :weight => 1.0 }.to_json }
-      result = {:status => 200}
+      options = with_options( { :weight => 1.0 }.to_json )
+      result  = {:status => 200}
+      url     = "http://sheldon.host/nodes/13/connections/movies_genres/14"
 
-      stub_and_expect_request(:put, url, with_options, result) do
+      stub_and_expect_request(:put, url, options, result) do
         SheldonClient.create :edge, { from: 13, to: 14, type: :movies_genres, payload: { weight: 1.0 }}
       end
     end
 
     it "should create edges from node objects" do
-      url = "http://sheldon.host/nodes/123/connections/movies_genres/321"
-      with_options = { :headers => {'Accept'=>'application/json',
-                                    'Content-Type'=>'application/json' },
-                       :body    => { :weight => 0.4 }.to_json }
-      result = {:status => 200}
+      options = with_options( { :weight => 0.4 }.to_json )
+      result  = {:status => 200}
+      url     = "http://sheldon.host/nodes/123/connections/movies_genres/321"
 
-      stub_and_expect_request(:put, url, with_options, result) do
+      stub_and_expect_request(:put, url, options, result) do
         node1 = SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'})
         node2 = SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'})
         SheldonClient.create :edge, { from: node1,
