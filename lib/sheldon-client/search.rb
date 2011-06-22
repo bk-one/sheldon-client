@@ -48,7 +48,7 @@ class SheldonClient
 
     #
     # Get the sheldon node associated with the given facebook-id. This will return
-    # a node or nil, if no such node is found.
+    # an array with all matched nodes or an empty array, if no such node is found.
     #
     # === Parameters
     #
@@ -59,7 +59,7 @@ class SheldonClient
     # Fetch the sheldon node for facebook item 1234567
     #
     #   SheldonClient.facebook_item( '1234567' )
-    #     => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>
+    #     => [#<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
     #
     def facebook_item( fbid )
       uri = build_search_url( nil, :facebook_ids => fbid )
