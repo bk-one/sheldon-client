@@ -107,8 +107,8 @@ describe SheldonClient do
 
       SheldonClient.send(:build_search_url, nil, :facebook_ids => '123').request_uri.should == "/search?facebook_ids=123"
       SheldonClient.send(:build_search_url, :movies, :title => 'Matrix').request_uri.should == "/search/nodes/movies?title=Matrix"
-      SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :type => :fulltext).request_uri.should ==
-        "/search/nodes/movies?title=Matrix&type=fulltext"
+      SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :mode => :fulltext).request_uri.should ==
+        "/search/nodes/movies?mode=fulltext&title=Matrix"
 
     end
   end
@@ -206,7 +206,7 @@ describe SheldonClient do
 
   context "searching for nodes" do
     it "should search for movies" do
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix&type=fulltext").
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix&mode=fulltext").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
         to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
 
