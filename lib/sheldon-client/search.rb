@@ -62,11 +62,8 @@ class SheldonClient
     #     => [#<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
     #
     def facebook_item( fbid )
-      uri = build_search_url( nil, :facebook_ids => fbid )
-      response = send_request( :get, uri )
-      response.code == '200' ? parse_search_result(response.body) : []
+      search( nil, { :facebook_ids => fbid }, :fulltext )
     end
-
 
 
     private
