@@ -1,7 +1,8 @@
 class SheldonClient
   module Status
+    TYPES = [:edge, :node]
 
-    # 
+    #
     # Get the sheldon status json hash including some basic
     # information with current edge and node statistics.
     #
@@ -13,7 +14,7 @@ class SheldonClient
       @status ||= get_sheldon_status
     end
 
-    
+
     #
     # List of all supported node types of sheldon. You can get
     # additional information about the schema and the supported
@@ -31,14 +32,14 @@ class SheldonClient
     end
 
 
-    # 
+    #
     # List of all supportes edge types of sheldon. Please note
     # that not all edges support connections from and to any
-    # node. You can fetch additional information using the 
+    # node. You can fetch additional information using the
     # #status method.
     #
     # === Example
-    # 
+    #
     # SheldonClient.edge_types
     # => [ 'likes', 'rating_similarity' ]
     #
@@ -51,9 +52,8 @@ class SheldonClient
       status['edges'].keys
     end
 
-
     private
-  
+
     def get_sheldon_status
       response = SheldonClient.send_request( :get, build_status_url )
       response.code == '200' ? status = JSON.parse( response.body ) : nil
