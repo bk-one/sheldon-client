@@ -206,7 +206,7 @@ describe SheldonClient do
 
   context "searching for nodes" do
     it "should search for movies" do
-      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix&mode=fulltext").
+      stub_request(:get, "http://sheldon.host/search/nodes/movies?production_year=1999&title=Matrix").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
         to_return(:status => 200, :body => [{ "type" => "Movie", "id" => "123" }].to_json )
 
@@ -217,7 +217,7 @@ describe SheldonClient do
     end
 
     it "should search for genres" do
-      stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
+      stub_request(:get, "http://sheldon.host/search/nodes/genres?mode=exact&name=Action").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
         to_return(:status => 200, :body => [{ "type" => "Genre", "id" => "321" }].to_json )
 
@@ -228,7 +228,7 @@ describe SheldonClient do
     end
 
     it "should return an empty array on no-content responses" do
-      stub_request(:get, "http://sheldon.host/search/nodes/genres?name=Action").
+      stub_request(:get, "http://sheldon.host/search/nodes/genres?mode=exact&name=Action").
         with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
         to_return(:status => 204, :body => '' )
 

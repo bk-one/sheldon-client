@@ -39,7 +39,7 @@ class SheldonClient
     #    SheldonClient.search :movies, { title: 'Fist*', type: fulltext }
     #
     def search( type, options = {}, search_type = :exact )
-      options[:mode] = search_type unless options[:mode] or search_type == :exact
+      options[:mode] = search_type unless options[:mode] or search_type == :fulltext
       uri = build_search_url( type, options )
       response = send_request( :get, uri )
       response.code == '200' ? parse_search_result(response.body) : []
