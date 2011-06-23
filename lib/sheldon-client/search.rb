@@ -70,7 +70,7 @@ class SheldonClient
 
     def build_search_url( type, query_parameters )
       uri = Addressable::URI.parse( self.host + "/search" + (type.nil? ? "" : "/nodes/#{type}") )
-      uri.query_values = query_parameters
+      uri.query_values = Hash[*query_parameters.clone.map{|k,v| [k,v.to_s]}.flatten] # convert values to strings
       uri
     end
 

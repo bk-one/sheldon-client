@@ -215,6 +215,14 @@ describe SheldonClient do
       result.first.id.should == "123"
       result.first.type.should == 'Movie'
     end
+    
+    it "should convert given query parameters to strings" do
+      stub_request(:get, "http://sheldon.host/search/nodes/genres?mode=exact&id=1").
+        with(:headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
+        to_return(:status => 200, :body => [{ "type" => "Genre", "id" => "321" }].to_json )
+
+      result = SheldonClient.search( :genres, {id: 1} )
+    end
 
     it "should search for genres" do
       stub_request(:get, "http://sheldon.host/search/nodes/genres?mode=exact&name=Action").
