@@ -430,7 +430,7 @@ class SheldonClient
 
   def self.dispatch_node_creation(options)
     response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '201' ? parse_node( response.body ) : nil
+    response.code == '201' ? parse_node( response.body ) : false
   end
 
   def self.dispatch_edge_creation(options)

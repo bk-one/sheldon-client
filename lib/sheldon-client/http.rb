@@ -8,7 +8,8 @@ class SheldonClient
       time = Benchmark.measure do
         result = send_request!( method, uri, body )
       end
-      log_sheldon_request( method, uri, time ) if SheldonClient.log?
+      log_sheldon_request( method, uri, time, body ) if SheldonClient.log?
+      log_sheldon_response( result ) if SheldonClient.log?
       result
     end
 
@@ -79,9 +80,18 @@ class SheldonClient
       Addressable::URI.parse( self.host + '/recommendations/user/' + node_id.to_s + '/containers')
     end
 
-    def log_sheldon_request( method, url, time )
-      log_line = "#{time.real} #{method.upcase} #{url}"
-      log_file ? get_logger.info(log_line) : puts("[#{Time.now}] #{log_line}")
+    def log_sheldon_request( method, url, time, body = '' )
+      write_log_line( "#{time.real} #{method.upcase} #{url}" )
+      write_log_line( "curl -v -X #{method.upcase} #{url}" + ((!body or body.empty?) ? "" : " -d '#{body.to_json}'") )
+    end
+    
+    def log_sheldon_response( result )
+      write_log_line( "Sheldon-Response <#{result.code}>: #{result.body}" )
+    end
+    
+    def write_log_line( log_line )
+      log_line = "[#{Time.now}] #{log_line}"
+      log_file ? get_logger.info(log_line) : puts(log_line)
     end
 
     def get_logger

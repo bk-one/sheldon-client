@@ -173,36 +173,61 @@ describe SheldonClient do
     end
   end
 
-  context "creating edges in sheldon" do
+  context "creating" do
     before(:each) do
       SheldonClient.host = 'http://sheldon.host'
     end
 
-    it "should create an request to create an edge" do
-      options = with_options( { :weight => 1.0 }.to_json )
-      result  = {:status => 200}
-      url     = "http://sheldon.host/nodes/13/connections/movies_genres/14"
-
-      stub_and_expect_request(:put, url, options, result) do
-        SheldonClient.create :edge, { from: 13, to: 14, type: :movies_genres, payload: { weight: 1.0 }}
+    context "nodes" do
+      before(:each) do
+        @url     = "http://sheldon.host/nodes/movies"
+        @payload = { title: 'Kikis Delivery Service' }
+        @options = with_options( @payload.to_json )
+      end
+      
+      it "should return the node object upon creation" do
+        result  = { :status => 201, :body => { id: 1, type: :movie, payload: @payload }.to_json }
+        stub_and_expect_request(:post, @url, @options, result) do
+          SheldonClient.create(:node, { type: :movies, payload: @payload }).should be_a(SheldonClient::Node)
+        end
+      end
+      
+      it "should return false if the node could not be created" do
+        result  = { :status => 404, :body => { id: 1, type: :movie, payload: @payload }.to_json }
+        stub_and_expect_request(:post, @url, @options, result) do
+          SheldonClient.create(:node, { type: :movies, payload: @payload }).should == false
+        end
       end
     end
 
-    it "should create edges from node objects" do
-      options = with_options( { :weight => 0.4 }.to_json )
-      result  = {:status => 200}
-      url     = "http://sheldon.host/nodes/123/connections/movies_genres/321"
+    context "edges" do
+      it "should create an request to create an edge" do
+        options = with_options( { :weight => 1.0 }.to_json )
+        result  = {:status => 200}
+        url     = "http://sheldon.host/nodes/13/connections/movies_genres/14"
 
-      stub_and_expect_request(:put, url, options, result) do
-        node1 = SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'})
-        node2 = SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'})
-        SheldonClient.create :edge, { from: node1,
-                                      to: node2,
-                                      type: :movies_genres,
-                                      payload: { weight: 0.4 }}
+        stub_and_expect_request(:put, url, options, result) do
+          SheldonClient.create :edge, { from: 13, to: 14, type: :movies_genres, payload: { weight: 1.0 }}
+        end
+      end
+
+      it "should create edges from node objects" do
+        options = with_options( { :weight => 0.4 }.to_json )
+        result  = {:status => 200}
+        url     = "http://sheldon.host/nodes/123/connections/movies_genres/321"
+
+        stub_and_expect_request(:put, url, options, result) do
+          node1 = SheldonClient::Node.new({'id' => 123, 'type' => 'Movie'})
+          node2 = SheldonClient::Node.new({'id' => 321, 'type' => 'Genre'})
+          SheldonClient.create :edge, { from: node1,
+                                        to: node2,
+                                        type: :movies_genres,
+                                        payload: { weight: 0.4 }}
+        end
       end
     end
   end
+
 
   context "searching for nodes" do
     it "should search for movies" do
