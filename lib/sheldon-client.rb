@@ -58,11 +58,9 @@ class SheldonClient
   #
 
   def self.fetch_neighbours( node, type )
-    node_id = node.is_a?(SheldonClient::Node) ? node.id : node
-
-    fetch_edges( node_id, type ).map do |edge|
-      fetch_node edge.to
-    end
+    uri = build_neighbour_url( node.to_i, type)
+    response = send_request( :get, uri )
+    response.code == '200' ? parse_search_result(response.body) : []
   end
 
   # Fetch a collection of edges given an url
