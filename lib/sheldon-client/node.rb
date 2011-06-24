@@ -19,5 +19,9 @@ class SheldonClient
     def name
       payload['name'] || payload['title']
     end
+
+    def ==(other)
+      id == other.id && type == other.type && other.payload == payload
+    end
   end
 end
