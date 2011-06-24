@@ -51,6 +51,10 @@ class SheldonClient
        Addressable::URI.parse( self.host + "/connections/" + id.to_s )
     end
 
+    def build_neighbour_url( node_id, type )
+      uri = Addressable::URI.parse( self.host + "/nodes/" + node_id.to_s + "/neighbours/" + type.to_s )
+    end
+
     def build_node_ids_of_type_url( type )
        Addressable::URI.parse( self.host + "/nodes/" + type.to_s + '/ids' )
     end
