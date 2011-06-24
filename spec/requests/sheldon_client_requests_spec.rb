@@ -20,6 +20,7 @@ describe SheldonClient do
   end
 
   describe "searching" do
+    pending
     it "should find a node on sheldon" do
       SheldonClient.search(:movies, title: "The Matrix").first.should_not be_nil
     end
@@ -33,7 +34,34 @@ describe SheldonClient do
     end
   end
 
-  describe "creating and deleting nodes" do
-    pending
+  describe "creating and searching nodes" do
+    let(:movie_title) do
+      "1234-This is a dummy movie"
+    end
+
+    before(:all) do
+      results  = SheldonClient.search(:movies, title: movie_title)
+      results.each{ |node| SheldonClient.delete_node(node.id) }
+
+      @node = SheldonClient.create(:node, { type: :movie, payload: { title: movie_title }})
+    end
+
+    after(:all) do
+      SheldonClient.delete_node(@node.id)
+    end
+
+    it "should have created a node in sheldon" do
+      @node.should_not be_false
+    end
+
+    it "should get the node from sheldon" do
+      results = SheldonClient.search(:movies, title: movie_title)
+      results.size.should eq(1)
+
+      results.first.should eq(@node)
+    end
+  end
+
+  describe "creating and deleting connections between nodes" do
   end
 end
