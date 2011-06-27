@@ -1,8 +1,12 @@
 require 'benchmark'
 require 'logger'
+require 'net/http'
 
 class SheldonClient
   module HTTP
+    
+    private 
+    
     def send_request( method, uri, body = nil )
       result = nil
       time = Benchmark.measure do
@@ -21,6 +25,20 @@ class SheldonClient
         result = http.request(req)
       end
     end
+    
+    def parse_sheldon_response( json_body )
+      data_hash = JSON.parse( json_body )
+      if is_edge?( data_hash )
+        SheldonClient::Connection.new data_hash
+      else
+        SheldonClient::Node.new data_hash
+      end
+    end
+    
+    def is_edge?( data )
+       data['from'] and data['to']
+    end
+    
 
     def build_request( method, uri, body = nil )
       request = Object.module_eval("Net::HTTP::#{method.capitalize}").new( uri.request_uri )
@@ -30,33 +48,16 @@ class SheldonClient
 
     def default_headers( request )
       request['Content-Type'] = 'application/json'
-      request['Accept'] = 'application/json'
+      request['Accept']       = 'application/json'
     end
 
-    def create_edge_url(options)
-      from = options[:from].is_a?(Node) ? options[:from].id : options[:from].to_i
-      to   = options[:to].is_a?(Node) ? options[:to].id : options[:to].to_i
-      Addressable::URI.parse( self.host + "/nodes/#{from}/connections/#{options[:type]}/#{to}" )
-    end
+  end
+end
 
-    def create_node_url(options)
-      Addressable::URI.parse( self.host + "/nodes/#{options[:type]}" )
-    end
-
-    def build_node_url( id )
-       Addressable::URI.parse( self.host + "/nodes/" + id.to_s )
-    end
-
+__END__
     def build_edge_url( id )
+
        Addressable::URI.parse( self.host + "/connections/" + id.to_s )
-    end
-
-    def build_node_ids_of_type_url( type )
-       Addressable::URI.parse( self.host + "/nodes/" + type.to_s + '/ids' )
-    end
-
-    def build_reindex_node_url( id )
-      Addressable::URI.parse( self.host + '/nodes/' + id.to_s + '/reindex' )
     end
 
     def build_reindex_edge_url( id )
@@ -89,13 +90,6 @@ class SheldonClient
       write_log_line( "Sheldon-Response <#{result.code}>: #{result.body}" )
     end
     
-    def write_log_line( log_line )
-      log_line = "[#{Time.now}] #{log_line}"
-      log_file ? get_logger.info(log_line) : puts(log_line)
-    end
 
-    def get_logger
-      @logger ||= Logger.new(log_file)
-    end
   end
 end

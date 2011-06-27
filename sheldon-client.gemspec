@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{sheldon-client}
-  s.version = "0.2.1"
+  s.version = "0.3.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Pontus Lindstrom", "Benjamin Krause"]
-  s.date = %q{2011-06-15}
+  s.date = %q{2011-06-26}
   s.description = %q{The gem makes it possible to talk to sheldon using easy calls}
   s.email = %q{core@moviepilot.com}
   s.extra_rdoc_files = [
@@ -19,19 +19,34 @@ Gem::Specification.new do |s|
   s.files = [
     "lib/sheldon-client.rb",
     "lib/sheldon-client/configuration.rb",
+    "lib/sheldon-client/crud/create.rb",
+    "lib/sheldon-client/crud/crud.rb",
+    "lib/sheldon-client/crud/delete.rb",
+    "lib/sheldon-client/crud/read.rb",
+    "lib/sheldon-client/crud/update.rb",
     "lib/sheldon-client/edge.rb",
-    "lib/sheldon-client/http.rb",
-    "lib/sheldon-client/node.rb",
-    "lib/sheldon-client/search.rb"
+    "lib/sheldon-client/http/http.rb",
+    "lib/sheldon-client/http/url_helper.rb",
+    "lib/sheldon-client/search.rb",
+    "lib/sheldon-client/sheldon/connection.rb",
+    "lib/sheldon-client/sheldon/node.rb",
+    "lib/sheldon-client/sheldon/sheldon_object.rb",
+    "lib/sheldon-client/sheldon/status.rb"
   ]
   s.homepage = %q{http://github.com/gozmo/sheldon-client}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
+  s.rubygems_version = %q{1.5.0}
   s.summary = %q{Talks to Sheldon}
   s.test_files = [
+    "spec/client/url_helper_spec.rb",
+    "spec/requests/sheldon_client_requests_spec.rb",
     "spec/sheldon-client_spec.rb",
-    "spec/spec_helper.rb"
+    "spec/sheldon/node_spec.rb",
+    "spec/sheldon/status_spec.rb",
+    "spec/spec_helper.rb",
+    "spec/support/http_support.rb",
+    "spec/support/web_mock_support.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -39,26 +54,35 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<addressable>, ["~> 2.2.0"])
+      s.add_runtime_dependency(%q<active_support>, [">= 0"])
+      s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.3.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_development_dependency(%q<webmock>, ["~> 1.6"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<mp-deployment>, [">= 0"])
     else
       s.add_dependency(%q<addressable>, ["~> 2.2.0"])
+      s.add_dependency(%q<active_support>, [">= 0"])
+      s.add_dependency(%q<ruby-debug19>, [">= 0"])
       s.add_dependency(%q<rspec>, ["~> 2.3.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_dependency(%q<webmock>, ["~> 1.6"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<mp-deployment>, [">= 0"])
     end
   else
     s.add_dependency(%q<addressable>, ["~> 2.2.0"])
+    s.add_dependency(%q<active_support>, [">= 0"])
+    s.add_dependency(%q<ruby-debug19>, [">= 0"])
     s.add_dependency(%q<rspec>, ["~> 2.3.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
     s.add_dependency(%q<webmock>, ["~> 1.6"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<mp-deployment>, [">= 0"])
   end
 end
 

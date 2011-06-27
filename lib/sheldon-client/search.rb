@@ -90,9 +90,6 @@ class SheldonClient
       Node.new JSON.parse( json_string )
     end
 
-    def is_edge?( data )
-       data['from'] and data['to']
-    end
 
 
 

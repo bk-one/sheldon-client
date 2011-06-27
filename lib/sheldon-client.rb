@@ -1,20 +1,130 @@
-require 'net/http'
 require 'json'
-require 'addressable/uri'
+require 'active_support/inflector'
+require 'forwardable'
+
+require 'sheldon-client/crud/crud'
+require 'sheldon-client/sheldon/status'
+
 require 'sheldon-client/configuration'
-require 'sheldon-client/http'
-require 'sheldon-client/node'
 require 'sheldon-client/search'
-require 'sheldon-client/edge'
-require 'sheldon-client/status'
-require 'sheldon-client/deprecated'
+require 'sheldon-client/sheldon/sheldon_object'
 
 class SheldonClient
   extend SheldonClient::Configuration
-  extend SheldonClient::HTTP
   extend SheldonClient::Search
-  extend SheldonClient::Status
-  extend SheldonClient::Deprecated
+  
+  @status = SheldonClient::Status
+
+  # Forward few status methods to the Status class. See 
+  # SheldonClient::Status for more information
+  class << self
+    extend Forwardable
+    def_delegators :@status, :status, :node_types, :connection_types
+  end
+
+  
+  #  
+  # Create a Node or Connection in Sheldon. Please see SheldonClient::Create
+  # for more information.
+  #
+  # === Parameters
+  # 
+  # type    - The type of object you want to create. :node and
+  #           :connection is supported.
+  # options - The type-specific options. Please refer to 
+  #           SheldonClient::Create for more information. This
+  #           should include a :type and might include a :payload
+  #           element.
+  # 
+  # ===  Examples
+  #
+  # Create a new node
+  #
+  #   SheldonClient.create :node, type: :movie, payload: { title: "Ran" }
+  #
+  # Create a new edge
+  #
+  #   SheldonClient.create :edge, type: 'like', from:    123,
+  #                               to:   321,    payload: { weight: 0.5 } }
+
+  def self.create(type, options)
+    SheldonClient::Create.create_sheldon_object( type, options )
+  end
+  
+  
+  #
+  # Updates the payload of a Node or Connection in Sheldon. Please see 
+  # SheldonClient::update for more information. Please also refer to the
+  # SheldonClient::Node#update and SheldonClient::Node#[]= method.
+  #
+  # ==== Parameters
+  # 
+  # object  - The object to be updated. This can be a Sheldon::Node, a
+  #           Sheldon::Connection or a Hahs in the form of { <type>: <id> }
+  # payload - The payload. The payload of the object will be replaces with
+  #           this payload.
+  #
+  # ==== Examples
+  #
+  # Update a node
+  #
+  #   node = SheldonClient.node 123
+  #   SheldonClient.update( node, year: '1999', title: 'Matrix' )
+  #   => true
+  #
+  #   SheldonClient.update_node( { node: 123 }, title: 'Air bud' )
+  #    => true
+
+  def self.update( object, payload )
+    SheldonClient::Update.update_sheldon_object( object, payload )
+  end
+
+
+  #
+  # Deletes the Node or Connection from Sheldon. Please see 
+  # SheldonClient::Delete for more information
+  #
+  # ==== Parameters
+  #
+  # object  - The object to be updated. This can be a Sheldon::Node, a
+  #           Sheldon::Connection or a Hahs in the form of { <type>: <id> }
+  #
+  # ==== Examples
+  #
+  # Delete a node from sheldon
+  #
+  #   SheldonClient.delete(node: 2011)
+  #   => true
+  #
+  # Delete a connection from sheldon
+  #
+  #  SheldonClient.delete(connection: 201) // Non existant connection
+  #   => false
+  #
+  
+  def self.delete( object )
+    SheldonClient::Delete.delete_sheldon_object( object )
+  end
+  
+  
+  #
+  # Fetch a single Node object from Sheldon. #node will return false if
+  # the node could not be fetched.
+  #
+  # ==== Parameters
+  #
+  # node_id - The sheldon-id of the object to be fetched. 
+  #
+  # ==== Examples
+  #
+  #   SheldonClient.node 17007
+  #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
+  #
+  def self.node( node_id )
+    SheldonClient::Read.fetch_sheldon_object( :node, node_id )
+  end
+  
+  
 
   # Fetch all the edges of a certain type connected to a given node.
   #
@@ -97,85 +207,8 @@ class SheldonClient
     response.code == '200' ? parse_search_result(response.body) : []
   end
 
-  # Fetches the node with the given id
-  #
-  # ==== Parameters
-  #
-  # * <tt> id </tt> The id of the node that is going to be fetched
-  #
-  # ==== Examples
-  #
-  # m = SheldonClient.fetch_node( 430 )
 
-  def self.fetch_node( id )
-    uri = build_node_url id
-    response = send_request( :get, uri )
-    response.code == '200' ? parse_node(response.body) : nil
-  end
 
-  # Create a Node or Edge at sheldon.
-  #
-  # ===  Examples
-  # Create a new node
-  # SheldonClient.create :node, { type: :movie, payload: { title: "Pulp Fiction" }}
-  #
-  # Create a new edge
-  # SheldonClient.create :edge, { type: :like,
-  #                               from: 123,
-  #                               to: 321,
-  #                               payload: { weight: 0.5 } }
-
-  def self.create(type, options)
-    validate_type_and_options(type, options)
-    case type
-    when :node
-      dispatch_node_creation(options)
-    when :connection
-      dispatch_edge_creation(options)
-    when :edge
-      dispatch_edge_creation(options)
-    end
-  end
-
-  # Updates the payload in a node
-  #
-  # ==== Parameters
-  # * <tt>options</tt> - The options that is going to be updated in the node,
-  #   only the <tt>payload</tt>
-  #
-  # ==== Examples
-  #
-  # Update a node
-  #
-  #   SheldonClient.update_node( 450, year: '1999' )
-  #    => true
-  #
-  #   SheldonClient.update_node( 456, title: 'Air bud' )
-  #    => true
-
-  def self.update_node( id, options )
-    node = node( id ) or return false
-    response = SheldonClient.send_request( :put, build_node_url( node.id ), options )
-    response.code == '200' ? true : false
-  end
-
-  # Deletes a node from the database
-  #
-  # ==== Parameters
-  # * <tt>id</tt> - The node id we want to be deleted from the database
-  #
-  # ==== Examples
-  #  SheldonClient.delete_node(2011)
-  #   => true
-  #
-  #  SheldonClient.delete_node(201) //Non existant node
-  #   => false
-  #
-
-  def self.delete_node(id)
-    response = SheldonClient.send_request( :delete, build_node_url( id ) )
-    response.code == '200' ? true : false
-  end
 
   # Deletes a edge from the database
   #
@@ -195,22 +228,6 @@ class SheldonClient
     response.code == '200' ? true : false
   end
 
-  # Fetch a single node object from sheldon
-  #
-  # ==== Parameters
-  #
-  # * <tt>id</tt> - the sheldon id
-  #
-  # ==== Examples
-  #
-  #   SheldonClient.node 17007
-  #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
-  #
-  def self.node( id )
-    uri = build_node_url( id )
-    response = send_request( :get, uri )
-    response.code == '200' ? Node.new(JSON.parse(response.body)) : nil
-  end
 
   #
   # Fetches all the node ids of a given node type
@@ -230,26 +247,6 @@ class SheldonClient
     response.code == '200' ? JSON.parse( response.body ) : nil
   end
 
-  #
-  # Reindexes a node in sheldon
-  #
-  # === Paremeters
-  #
-  #  * <tt>node_id</tt> - The node
-  #
-  # === Examples
-  #
-  #  SheldonClient.reindex_node( 13 )
-  #  => true
-  #
-  #  SheldonClient.reindex_node( 37 ) // Non existing node
-  #  => false
-
-  def self.reindex_node( node_id )
-    uri = build_reindex_node_url( node_id )
-    response = send_request( :put , uri )
-    response.code == '200' ? true : false
-  end
 
   #
   # Reindex an edge in Sheldon
@@ -350,39 +347,7 @@ class SheldonClient
     response.code == '200' ? JSON.parse( response.body ) : nil
   end
 
-  #
-  # Fetches all the tracked high score edges for a user
-  #
-  # === Parameters
-  #
-  # <tt>id</tt> - The id of the sheldon user node
-  #
-  # === Examples
-  #
-  # SheldonClient.get_highscores_tracked 13
-  # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
-  #
 
-  def self.get_highscores_tracked( id )
-    self.get_highscores id, 'tracked'
-  end
-
-  #
-  # Fetches all the untracked high scores edges for a user
-  #
-  # === Paremeters
-  #
-  # <tt>id</tt> - The id of the sheldon user node
-  #
-  # === Examples
-  #
-  # SheldonClient.get_highscores_untracked 13
-  # => [ {'id' => 5, 'from' => 6, 'to' => 1, 'payload' => { 'weight' => 5}} ]
-  #
-
-  def self.get_highscores_untracked id
-    self.get_highscores id, 'untracked'
-  end
 
   #
   # Fetchets all the recommendations for a user
@@ -426,22 +391,4 @@ class SheldonClient
     end
   end
 
-  private
-
-  def self.dispatch_node_creation(options)
-    response = send_request( :post, create_node_url( options ), options[:payload] )
-    response.code == '201' ? parse_node( response.body ) : false
-  end
-
-  def self.dispatch_edge_creation(options)
-    response = send_request( :put, create_edge_url( options ), options[:payload] )
-    response.code == '200' ? true : false
-  end
-
-  # PENDING: Given the type validate the options
-  def self.validate_type_and_options(type, options)
-    unless SheldonClient::Status::TYPES.include?(type)
-      raise ArgumentError, 'Unknown type'
-    end
-  end
 end

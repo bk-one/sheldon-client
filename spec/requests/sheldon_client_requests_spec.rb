@@ -24,11 +24,11 @@ describe SheldonClient do
       SheldonClient.search(:movies, title: "The Matrix").first.should_not be_nil
     end
 
-    it "should find an user on sheldon given his facebook's username" do
+    xit "should find an user on sheldon given his facebook's username" do
       SheldonClient.search( :users, username: 'gonzo gonzales' ).first.should_not be_nil
     end
 
-    it "should find an user on sheldon given his facebook id" do
+    xit "should find an user on sheldon given his facebook id" do
       SheldonClient.search(:users, facebook_ids: "100002398994863").first.should_not be_nil
     end
   end
