@@ -53,7 +53,7 @@ module HttpSupport
       when :node_created          then { status: 201, body: { type: node_type.to_s.camelcase, id: node_id, payload: payload }.to_json }
                                   
       when :connection            then { status: 200, body: { type: connection_type.to_s.camelcase, from: from_id.to_s, to: to_id.to_s, payload: connection_payload }.to_json }
-      when :connection_created    then { status: 201, body: { type: connection_type.to_s.camelcase, from: from_id.to_s, to: to_id.to_s, payload: connection_payload }.to_json }
+      when :connection_created    then { status: 200, body: { type: connection_type.to_s.camelcase, from: from_id.to_s, to: to_id.to_s, payload: connection_payload }.to_json }
         
       when :connection_collection then { status: 200, body: [{type: connection_type.to_s.camelcase, from: from_id.to_s, to: to_id.to_s, payload: connection_payload }].to_json }
       when :neighbour_collection  then { status: 200, body: [{type: neighbour_type.to_s.camelcase, id: neighbour_id.to_s, payload: neighbour_payload }].to_json }

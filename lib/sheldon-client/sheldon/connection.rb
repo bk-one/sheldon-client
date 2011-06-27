@@ -30,7 +30,7 @@ class SheldonClient
     end
 
     def to_s
-      "#<Sheldon::Connection #{id} (#{type}/#{from}->#{to})>"
+      "#<Sheldon::Connection #{id} (#{type}/#{from_id}->#{to_id})>"
     end
   end
 end

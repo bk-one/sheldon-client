@@ -36,3 +36,5 @@ require 'sheldon-client/crud/create'
 require 'sheldon-client/crud/read'
 require 'sheldon-client/crud/update'
 require 'sheldon-client/crud/delete'
+
+require 'sheldon-client/crud/search'

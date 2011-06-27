@@ -8,7 +8,7 @@ class SheldonClient
       if to.nil?
         path = "/nodes/#{from.to_i}/connections/#{type.to_s.pluralize}"
       else
-        path = "/nodes/#{from.to_i}/connections/#{to.to_i}/#{type.to_s.pluralize}"
+        path = "/nodes/#{from.to_i}/connections/#{type.to_s.pluralize}/#{to.to_i}"
         
       end
       Addressable::URI.parse( SheldonClient.host + path )
@@ -37,8 +37,31 @@ class SheldonClient
       Addressable::URI.parse( SheldonClient.host + path )
     end
     
+    def search_url( query, options = {} )
+      if options[:type]
+        path = "/search/nodes/" + options.delete(:type).to_s.pluralize
+      else
+        path = "/search"
+      end
+      options[:mode] ||= :exact
+      query = { q: query } if query.is_a?(String)
+      uri = Addressable::URI.parse( SheldonClient.host + path )
+      uri.query_values = query.update(options)
+      uri
+    end
+    
     def status_url
       Addressable::URI.parse( SheldonClient.host + "/status" )
     end
   end
 end
+
+
+__END__
+
+def self.build_search_url( type, query_parameters )
+  uri = Addressable::URI.parse( self.host + "/search" + (type.nil? ? "" : "/nodes/#{type}") )
+  uri.query_values = Hash[*query_parameters.clone.map{|k,v| [k,v.to_s]}.flatten] # convert values to strings
+  uri
+end
+

@@ -192,7 +192,7 @@ describe SheldonClient::Node do
 
         it "should create an connection without a payload" do
           stub_and_expect_request(:put, url, request_data({}), response(:connection_created)) do
-            node.likes to_id
+            node.likes( to_id ).should be_a( SheldonClient::Connection )
           end
         end
 

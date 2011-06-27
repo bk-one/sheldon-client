@@ -103,10 +103,6 @@ describe SheldonClient do
 # 
 #       SheldonClient.build_recommendation_url( 3 ).request_uri.should == '/recommendations/user/3/containers'
 # 
-#       SheldonClient.send(:build_search_url, nil, :facebook_ids => '123').request_uri.should == "/search?facebook_ids=123"
-#       SheldonClient.send(:build_search_url, :movies, :title => 'Matrix').request_uri.should == "/search/nodes/movies?title=Matrix"
-#       SheldonClient.send(:build_search_url, :movies, :title => 'Matrix', :mode => :fulltext).request_uri.should ==
-#         "/search/nodes/movies?mode=fulltext&title=Matrix"
 # 
 #     end
 #   end

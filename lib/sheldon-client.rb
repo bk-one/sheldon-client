@@ -6,12 +6,10 @@ require 'sheldon-client/crud/crud'
 require 'sheldon-client/sheldon/status'
 
 require 'sheldon-client/configuration'
-require 'sheldon-client/search'
 require 'sheldon-client/sheldon/sheldon_object'
 
 class SheldonClient
   extend SheldonClient::Configuration
-  extend SheldonClient::Search
   
   @status = SheldonClient::Status
 
@@ -120,36 +118,55 @@ class SheldonClient
   #   SheldonClient.node 17007
   #   => #<Sheldon::Node 17007 (Movie/Tonari no Totoro)>]
   #
+  
   def self.node( node_id )
     SheldonClient::Read.fetch_sheldon_object( :node, node_id )
   end
   
   
-
-  # Fetch all the edges of a certain type connected to a given node.
+  #
+  # Search for Sheldon Nodes. This will return an array of SheldonClient::Node 
+  # objects or an empty array.
   #
   # ==== Parameters
   #
-  # * <tt> node </tt> The node (or id) that we are going to fetch edges from
-  # * <tt> type </tt> The egde type we are interesting in
+  # type    - plural of any known sheldon node type like :movies or :genres. 
+  #           Pass nil if you want to search all node-types.
+  # options - the search option that will be forwarded to lucene. This depends
+  #           on the type, see below. options[:type] is reserved for the type
+  #           of search you want to perform. Pass :exact or :fulltext for 
+  #           exact or fulltext matches.
+  #
+  # ==== Search Options
+  #
+  # Depending on the type of nodes you're searching for, different search options 
+  # should be provided. You can fetch the supported search keywords using the 
+  # status method like that:
+  #
+  #    SheldonClient.status['nodes']['movie']['properties'].keys
+  #    => [ 'title', 'production_year', 'moviemaster_id', 'facebook_ids', ... ]
+  #
   #
   # ==== Examples
   #
-  #  m = SheldonClient.search(:movies, { title: '99 Euro*'} ).first
-  #  e = SheldonClient.fetch_edges(m, 'genre_taggings')
+  # Search for a specific movie
   #
-  #  g = SheldonClient.search(:genres, name: 'Drama').first
-  #  e = SheldonClient.fetch_edges(m, 'genre_taggings')
+  #   SheldonClient.search :movies, { title: 'The Matrix' }
+  #   SheldonClient.search :movies, { title: 'Fear and Loathing in Las Vegas', production_year: 1998 }
   #
-  #  m = SheldonClient.fetch_node( 430 )
-  #  e = SheldonClient.fetch_edges(
+  # Search for a specific genre
   #
-
-  def self.fetch_edges( node, type )
-    uri = build_edge_search_url( node.to_i, type)
-    response = send_request( :get, uri )
-    response.code == '200' ? parse_search_result(response.body) : []
+  #    SheldonClient.search :genres, { name: 'Action' }
+  #
+  # And now with wildcards
+  #
+  #    SheldonClient.search :movies, { title: 'Fist*', type: fulltext }
+  #
+  
+  def self.search( type, options = {} )
+    SheldonClient::Search.search( type, options )
   end
+
 
   # Fetch all the nodes connected to a given node via edges of type <edge_type>
   #

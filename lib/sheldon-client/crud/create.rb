@@ -56,7 +56,7 @@ class SheldonClient
       validate_connection_options( options )
       response = send_request( :put,  connections_url( options[:from], options[:type], options[:to] ),
                                       (options[:payload] || {}) )
-      response.code == '201' ?
+      response.code == '200' ?
         parse_sheldon_response(response.body) : false
     end
 
